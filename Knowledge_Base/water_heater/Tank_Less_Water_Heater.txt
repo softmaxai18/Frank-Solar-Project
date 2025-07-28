@@ -1,0 +1,7 @@
+Tank-less water heaters are compact, wall-hung units that operate by supplying hot water on-demand. Once the flow sensor detects that the hot water valve is open, it sends signals to the control module that demand for hot water is needed. The control module would then start the heating process. If electric, cold water would flow through serpentine pipes with resistive heating coils. If natural gas, the control module would signal the fan to turn on, the gas valve to open, and the ignitor to light the burner. The cold water would then circulate through a serpentine heat exchanger, absorbing heat from the exhaust gases. 
+
+Tank-less water heaters can also be equipped with a condensing unit, where the water would flow through a secondary heat exchanger. In this process, additional heat would be extracted from exhaust gases. Condensate may also be produced from the cooling of the exhaust gases, which would be drained and neutralized.
+
+Once the water exits the heating process, the hot water would flow to the hot water valve. In addition, a temperature sensor would measure the water temperature, alerting the control module to adjust the gas valve to reach the desired temperature.
+
+Tank-less water heaters do not take up much space and can provide hot water without any potential waiting time. These systems are also relatively energy efficient. However, there is a high upfront cost to purchase and install this system. In addition, these systems may struggle to meet the demands of simultaneous multi-point usage.

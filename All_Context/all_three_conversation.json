@@ -1,0 +1,353 @@
+[
+  {
+    "user": "Stacy Fox",
+    "conversation": [
+      {
+        "AI": "All right, So what is your main reason for purchasing a new water heater?"
+      },
+      {
+        "USER": "The water heater is reaching the end of its expected life. So I want to look into the pricing and options."
+      },
+      {
+        "AI": "OK. What type of water heater do you currently have?"
+      },
+      {
+        "USER": "It's Bradford 47 gallon tank electric water heater."
+      },
+      {
+        "AI": "OK. And how old is it?"
+      },
+      {
+        "USER": "It's January 2014, so about 11 years."
+      },
+      {
+        "AI": "OK. And how many people does the unit serve in your house?"
+      },
+      {
+        "USER": "Three people."
+      },
+      {
+        "AI": "What appliances do you have that use hot water?"
+      },
+      {
+        "USER": "Basically dishwasher, shower, kitchen sinks, 2 bathroom sinks."
+      },
+      {
+        "AI": "Washing machine?"
+      },
+      {
+        "USER": "Oh yeah, sorry, washing machine. But we do mainly use cold on that so."
+      },
+      {
+        "AI": "Oh, OK, that makes sense. And how satisfied would you say you were with your previous unit?"
+      },
+      {
+        "USER": "It's been pretty good. Like I bought the house three years ago and we've never had issues with not having hot water. It always seemed to have plenty of hot water for showers and the dishwasher works fine. We did have hard water, so I know that shortens the life span."
+      },
+      {
+        "AI": "Gotcha. Yeah. Do you or any of your neighbors have any natural gas appliances?"
+      },
+      {
+        "USER": "No, we don't have natural gas in our in our neighborhood."
+      },
+      {
+        "AI": "OK. And where is your water heater located?"
+      },
+      {
+        "USER": "It's under the stairs in like a utility closet off of the kitchen."
+      },
+      {
+        "AI": "OK. And geographically, where are you located? Just the town is fine."
+      },
+      {
+        "USER": "Quakertown, PA."
+      },
+      {
+        "AI": "Would you be interested in a different type of water heater, either to save money or reduce your carbon footprint?"
+      },
+      {
+        "USER": "Yeah, my sister got a tankless water heater and I like the idea that it's more efficient and then also it has a longer lifespan."
+      },
+      {
+        "AI": "Awesome. Sort of going off of that, would you be willing to spend a little more money upfront for a more efficient unit that may save you money in the long run?"
+      },
+      {
+        "USER": "Yeah, since it has like almost 10 to 15 years additional lifespan and then also the cost of not having to heat water I'm not using."
+      },
+      {
+        "AI": "Yeah, awesome. And how would qualifying for rebates or tax credits affect your decision?"
+      },
+      {
+        "USER": "Oh, that would. Yeah, that would definitely help if that was available."
+      },
+      {
+        "AI": "Would you say the space is pretty small that the water heater is in now?"
+      },
+      {
+        "USER": "Yeah, it is. It's short because it's 47 gallons, but it's like only like 3 feet tall and just not as wide as the taller ones 'cause, it fits under the stairs."
+      },
+      {
+        "AI": "All right. Did you have to do any maintenance to your previous unit? Was it drained or flushed yearly or every couple years?"
+      },
+      {
+        "USER": "I didn't realize I was supposed to do that. Being a new homeowner, I just found that out looking up stuff recently. And considering the state of the House and the other maintenance things when I bought it, I highly doubt the previous owner did it. So it probably, at least in the past seven years, hasn't been done."
+      },
+      {
+        "AI": "Awesome, that should be everything I need. Thank you very much, Stacy."
+      },
+      {
+        "USER": "All right. Thanks."
+      }
+    ]
+  },
+  {
+    "user": "Samantha Baughman",
+    "conversation": [
+      {
+        "AI": "OK. What is your main reason for purchasing a new water heater?"
+      },
+      {
+        "USER": "The main reason is I'm not getting enough hot water to supply my house for three different people with hot water to take a shower."
+      },
+      {
+        "AI": "OK. What type of water heater do you currently have?"
+      },
+      {
+        "USER": "I have a rheem 29 gallon water heater from 2000."
+      },
+      {
+        "AI": "OK. And is it electric or natural gas?"
+      },
+      {
+        "USER": "It's natural gas."
+      },
+      {
+        "AI": "Natural gas, OK. And you said it serves 3 people in your house?"
+      },
+      {
+        "USER": "Yes. And a dog."
+      },
+      {
+        "AI": "OK. What other appliances do you have that also use hot water?"
+      },
+      {
+        "USER": "My sinks. I don't have a dishwasher or washer or dryer."
+      },
+      {
+        "AI": "OK, perfect. How satisfied would you say you are with your current unit? I know you already said, but..."
+      },
+      {
+        "USER": "If we're going to give it a one out of 10, I would probably say a 4."
+      },
+      {
+        "AI": "4. Perfect. And you said it was natural gas?"
+      },
+      {
+        "USER": "Yep."
+      },
+      {
+        "AI": "OK. Where is the water heater located?"
+      },
+      {
+        "USER": "In the basement, under the stairs."
+      },
+      {
+        "AI": "Got it. And is there a good amount of space in that area, or is it pretty space-constrained?"
+      },
+      {
+        "USER": "It's not like super roomy, but there is like I don't really have anything in the basement besides the water heater, but there's like room in there other than that."
+      },
+      {
+        "AI": "And then where are you located at geographically? Just a town is fine."
+      },
+      {
+        "USER": "Whitehall, PA."
+      },
+      {
+        "AI": "OK. And would you be interested in a different type of water heater either to save money or reduce your carbon footprint?"
+      },
+      {
+        "USER": "Both definitely."
+      },
+      {
+        "AI": "OK. And would you be willing to spend more money upfront for a more efficient unit that might save you money in the long run?"
+      },
+      {
+        "USER": "Yes."
+      },
+      {
+        "AI": "Would qualifying for rebates or tax credits make you more interested in one technology over another?"
+      },
+      {
+        "USER": "100%."
+      },
+      {
+        "AI": "OK. And then do you have a drain nearby where your current water heater is?"
+      },
+      {
+        "USER": "I think so. I haven't like dived into it. I know how to turn it off."
+      },
+      {
+        "AI": "And is that space heated and cooled?"
+      },
+      {
+        "USER": "Yes."
+      },
+      {
+        "AI": "OK. And how long do you expect your water heater to last once installed?"
+      },
+      {
+        "USER": "I would hope for at least 10 years. I also don't know much about them."
+      },
+      {
+        "AI": "And did you have to do any maintenance to your previous unit like draining it or flushing it every once in awhile?"
+      },
+      {
+        "USER": "Honestly, no, I'm not. I am not."
+      },
+      {
+        "AI": "OK, perfect. I think that's all the questions."
+      },
+      {
+        "USER": "Cool."
+      },
+      {
+        "AI": "All right. Thank you very much."
+      },
+      {
+        "USER": "No problem."
+      }
+    ]
+  },
+  {
+    "user": "Kelly Sanders",
+    "conversation": [
+      {
+        "AI": "So first question, what is your main reason for purchasing a new water heater?"
+      },
+      {
+        "USER": "Well, at the moment, our current hot water heater is pretty old, so I'm anticipating that we will need to purchase one soon and I'd rather look into things before it becomes an emergency."
+      },
+      {
+        "AI": "What type of water heater do you currently have?"
+      },
+      {
+        "USER": "It is 80 gallons and electric. I have all electric at my home. It's a Bradford white water heater that is 45,000 or 4500 watts."
+      },
+      {
+        "AI": "OK, perfect. How long have you had it or about how old is it?"
+      },
+      {
+        "USER": "Umm. I don't recall exactly. How old? I don't recall exactly how old it is definitely. Has to be like 20 years old or older."
+      },
+      {
+        "AI": "OK, about 20 years old. OK. And then, Yep, you said it's 80 gallons. How many people does the unit serve in your house?"
+      },
+      {
+        "USER": "OK 5 people."
+      },
+      {
+        "AI": "What other appliances do you have that use hot water?"
+      },
+      {
+        "USER": "Washer, dryer, dishwasher, and bathrooms. I think that's it."
+      },
+      {
+        "AI": "OK. And then how satisfied were you with the performance of your current unit?"
+      },
+      {
+        "USER": "I'm fairly satisfied. Hot water never seems to be an issue. We do have a lot of people in the house as far as needing hot water, and even if everyone's taking showers, or if we're doing laundry and showers at the same time, it is not an issue. It is a rather large unit."
+      },
+      {
+        "AI": "OK. Do you or any of your neighbors have any natural gas appliances?"
+      },
+      {
+        "USER": "No, natural gas is not available at least in my close neighborhood vicinity."
+      },
+      {
+        "AI": "OK. And where is the current water heater located in your house?"
+      },
+      {
+        "USER": "Basement."
+      },
+      {
+        "AI": "Is it pretty space-constrained in your basement, or is there a good amount of room around it?"
+      },
+      {
+        "USER": "Sorry, we also have a hot tub in our basement, but we don't use it. And the water heater sits in the storage space. Right behind that. I mean it's a little space-constrained back there. We try not to store too much stuff there."
+      },
+      {
+        "AI": "It's in a closet, then in the basement?"
+      },
+      {
+        "USER": "Correct."
+      },
+      {
+        "AI": "All right. And where are you located geographically? Just a town name would be fine."
+      },
+      {
+        "USER": "Fogelsville."
+      },
+      {
+        "AI": "Would you be interested in a different type of water heater, either to save money or reduce your carbon footprint?"
+      },
+      {
+        "USER": "Yes."
+      },
+      {
+        "AI": "OK. Which of those aspects would you say is more important in looking for a new water heater?"
+      },
+      {
+        "USER": "Saving money."
+      },
+      {
+        "AI": "OK."
+      },
+      {
+        "USER": "I don't know if you want this in the transcript, but we do intend, I mean, I would like to do solar on our house since we do have an all electric house at some point in future. I just don't have the funding for that yet."
+      },
+      {
+        "AI": "OK. Would you be willing to spend more money upfront for a more efficient unit if it had the potential to maybe save you money in the long run?"
+      },
+      {
+        "USER": "Yes."
+      },
+      {
+        "AI": "And then would qualifying for rebates or tax credits make you more interested in one technology over the other?"
+      },
+      {
+        "USER": "Yes."
+      },
+      {
+        "AI": "OK. Is there a drain located nearby your existing water heater? Do you know?"
+      },
+      {
+        "USER": "Yes."
+      },
+      {
+        "AI": "Is the space that your water heater is located in heated and cooled?"
+      },
+      {
+        "USER": "Yes, it is heated and cooled. It's a finished basement."
+      },
+      {
+        "AI": "OK. And then once installed, how long would you expect your water heater to last?"
+      },
+      {
+        "USER": "Good question. Whatever that useful life of water heaters typically are. I would love it to last for like 20 years. That would be great."
+      },
+      {
+        "AI": "And then last question, did you do any maintenance to your previous water heater? Like draining it, flushing it out yearly, anything like that?"
+      },
+      {
+        "USER": "I don't believe so. But we have not been in that House for that long. Been in this location for three years."
+      },
+      {
+        "AI": "All right, Kelly, thank you very much for your participation."
+      },
+      {
+        "USER": "No worries. Thanks, Brent."
+      }
+    ]
+  }
+]

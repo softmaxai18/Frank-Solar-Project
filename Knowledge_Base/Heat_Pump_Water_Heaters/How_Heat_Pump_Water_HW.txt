@@ -1,0 +1,17 @@
+Heat pump water heaters use electricity to move heat from one place to another instead of generating heat directly. Therefore, they can be two to three times more energy efficient than conventional electric resistance water heaters. To move the heat, heat pumps work like a refrigerator in reverse.
+
+Image
+Image related to Heat Pump Water Heaters
+While a refrigerator pulls heat from inside a box and sends it into the surrounding room, a stand-alone air-source heat pump water heater pulls heat from the surrounding air and transfers it -- at a higher temperature -- to heat water in a storage tank. You can purchase a stand-alone heat pump water heating system as an integrated unit with a built-in water storage tank and back-up resistance heating elements. You can also retrofit a heat pump to work with an existing conventional storage water heater.
+
+Heat pump water heaters require installation in locations that remain in the 40º–90ºF (4.4º–32.2ºC) range year-round and provide at least 1,000 cubic feet (28.3 cubic meters) of air space around the water heater. Air passing over the evaporator can be exhausted to the room or outdoors.
+
+Heat pump water heaters will not operate efficiently in a cold space since they tend to cool the space they are in.  Installing them in a space with excess heat, such as a furnace room, will increase their efficiency.
+
+You can also install an air-source heat pump system that combines heating, cooling, and water heating. These combination systems pull their heat indoors from the outside air in the winter and from the inside air in the summer. Because they remove heat from the air, any type of air-source heat pump system works more efficiently in a warm climate.
+
+Homeowners primarily install geothermal heat pumps -- which draw heat from the ground during the winter and from the indoor air during the summer -- for heating and cooling their homes. For water heating, you can add a desuperheater to a geothermal heat pump system. A desuperheater is a small, auxiliary heat exchanger that uses superheated gases from the heat pump's compressor to heat water. This hot water then circulates through a pipe to the storage water heater tank in the house.
+
+Desuperheaters are also available for tankless or demand-type water heaters. In the summer, the desuperheater uses the excess heat that would otherwise be expelled to the ground. With frequent operation during the summer, the geothermal heat pump may provide the majority of your hot water needs.  
+
+During the fall, winter, and spring -- when the desuperheater isn't producing as much excess heat -- you'll need to rely more on your storage or demand water heater. Some manufacturers also offer triple-function geothermal heat pump systems, which provide heating, cooling, and hot water. They use a separate heat exchanger to meet all of a household's hot water needs.

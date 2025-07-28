@@ -1,0 +1,13 @@
+Most solar water heaters require a well-insulated storage tank. Solar storage tanks have an additional outlet and inlet connected to and from the collector. In two-tank systems, the solar water heater preheats water before it enters the conventional water heater. In one-tank systems, the back-up heater is combined with the solar storage in one tank.
+
+Three types of solar collectors are used for residential applications:
+
+Flat-plate collector
+Glazed flat-plate collectors are insulated, weatherproofed boxes that contain a dark absorber plate under one or more glass or plastic (polymer) covers. Unglazed flat-plate collectors -- typically used for solar pool heating -- have a dark absorber plate, made of metal or polymer, without a cover or enclosure.
+Integral collector-storage systems
+Also known as ICS or batch systems, they feature one or more black tanks or tubes in an insulated, glazed box. Cold water first passes through the solar collector, which preheats the water. The water then continues on to the conventional backup water heater, providing a reliable source of hot water. They should be installed only in mild-freeze climates because the outdoor pipes could freeze in severe, cold weather.
+Evacuated-tube solar collectors
+They feature parallel rows of transparent glass tubes. Each tube contains a glass outer tube and metal absorber tube attached to a fin. The fin's coating absorbs solar energy but inhibits radiative heat loss. These collectors are used more frequently for U.S. commercial applications.
+Solar water heating systems almost always require a backup system for cloudy days an
+
+d times of increased demand. Conventional storage water heaters usually provide backup and may already be part of the solar system package. A backup system may also be part of the solar collector, such as rooftop tanks with thermosyphon systems. Since an integral-collector storage system already stores hot water in addition to collecting solar heat, it may be packaged with a tankless or demand-type water heater for backup.

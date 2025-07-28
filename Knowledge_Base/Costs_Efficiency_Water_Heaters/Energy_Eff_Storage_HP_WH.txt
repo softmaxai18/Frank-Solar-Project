@@ -1,0 +1,11 @@
+UEF ratings are determined by assigning water heaters into one of four different categories of hot water usage and then evaluating their performance based on that usage. These categories are called bins. A water heater is assigned a UEF within its bin based upon its first hour rating. A higher UEF means a water heater is more energy efficient and will cost less to operate compared to other water heaters in the same bin. A water heater’s UEF can only be compared with water heaters within the same bin.
+
+The higher the uniform energy factor, the more efficient the water heater. However, higher energy factor values don't always mean lower annual operating costs, especially when you compare fuel sources.
+
+Product literature from a manufacturer usually provides a water heater model's energy factor. Don't choose a water heater model based solely on its energy factor. When selecting a water heater, it's also important to consider size and first hour rating, fuel type, and overall cost.
+
+BIN,BIN Daily Usage (Gallons), First Hour Rating (Tank-Type Water Heaters), Max GPM (Tankless Water Heaters)
+Very Small, 10,Less than 18 gallons, Less than 1.7
+Low, 38, 18 to 51 gallons, 1.7 to 2.8
+Medium, 55,51 to 75 gallons, 2.8 to 4
+High, 84 ,75 gallons or larger ,4 or more

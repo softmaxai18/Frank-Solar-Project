@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Water Heater Recommendation System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #ffffff 0%, #ffffff 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .chat-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 0px 25px rgba(0, 0, 0, 0.4);
+            width: 1400px;
+            max-width: 2000px;
+            height: 96vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .chat-header {
+            background: linear-gradient(135deg, #1e40af 0%, #000000 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 20px 20px 0 0;
+        }
+
+        .chat-header h1 {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        .chat-header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+
+        .message {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: flex-start;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .message.user {
+            justify-content: flex-end;
+        }
+
+        .message.assistant {
+            justify-content: flex-start;
+        }
+
+        .message-content {
+            max-width: 70%;
+            padding: 15px 20px;
+            border-radius: 20px;
+            word-wrap: break-word;
+            line-height: 1.5;
+        }
+
+        .message.user .message-content {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-bottom-right-radius: 5px;
+        }
+
+        .message.assistant .message-content {
+            background: white;
+            color: #333;
+            border: 1px solid #e0e0e0;
+            border-bottom-left-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .message.assistant .message-content h2 {
+            color: #4facfe;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+
+        .message.assistant .message-content h3 {
+            color: #667eea;
+            margin: 15px 0 8px 0;
+            font-size: 16px;
+        }
+
+        .message.assistant .message-content strong {
+            color: #333;
+        }
+
+        .message.assistant .message-content ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+
+        .message.assistant .message-content li {
+            margin: 5px 0;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin: 0 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            font-size: 16px;
+        }
+
+        .avatar.user {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .avatar.assistant {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .chat-input {
+            background: white;
+            padding: 20px;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .input-group {
+            flex: 1;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        #messageInput {
+            flex: 1;
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 25px;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        #messageInput:focus {
+            border-color: #4facfe;
+        }
+
+        .send-button {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: transform 0.2s;
+        }
+
+        .send-button:hover {
+            transform: scale(1.05);
+        }
+
+        .send-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .restart-button {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ffa500 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: transform 0.2s;
+        }
+
+        .restart-button:hover {
+            transform: scale(1.05);
+        }
+
+        .typing-indicator {
+            display: none;
+            align-items: center;
+            gap: 8px;
+            color: #6b7280;
+            font-size: 0.875rem;
+            margin: 8px 0;
+            padding: 0 20px;
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 4px;
+        }
+
+        .typing-dots span {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #9ca3af;
+            animation: bounce 1.4s infinite both;
+        }
+
+        .typing-dots span:nth-child(1) {
+            animation-delay: -0.32s;
+        }
+
+        .typing-dots span:nth-child(2) {
+            animation-delay: -0.16s;
+        }
+
+        @keyframes bounce {
+
+            0%,
+            80%,
+            100% {
+                transform: scale(0);
+            }
+
+            40% {
+                transform: scale(1);
+            }
+        }
+
+        .status-bar {
+            background: #f0f0f0;
+            padding: 10px 20px;
+            font-size: 12px;
+            color: #666;
+            text-align: center;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes typing {
+
+            0%,
+            60%,
+            100% {
+                transform: translateY(0);
+                opacity: 0.5;
+            }
+
+            30% {
+                transform: translateY(-10px);
+                opacity: 1;
+            }
+        }
+
+        .error-message {
+            background: #ffebee;
+            color: #c62828;
+            padding: 10px 20px;
+            border-radius: 10px;
+            margin: 10px 0;
+            border-left: 4px solid #c62828;
+        }
+
+        .success-message {
+            background: #e8f5e8;
+            color: #2e7d32;
+            padding: 10px 20px;
+            border-radius: 10px;
+            margin: 10px 0;
+            border-left: 4px solid #2e7d32;
+        }
+
+        @media (max-width: 768px) {
+            .chat-container {
+                width: 95%;
+                height: 90vh;
+            }
+
+            .message-content {
+                max-width: 85%;
+            }
+
+            .chat-header h1 {
+                font-size: 20px;
+            }
+
+            .input-group {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            #messageInput {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <h1>♨ Water Heater Type Recommendation System</h1>
+            <p>Find the perfect water heater for your home with AI-powered recommendations</p>
+        </div>
+
+        <div class="chat-messages" id="chatMessages">
+            <!-- Messages will appear here -->
+        </div>
+
+        <div class="typing-indicator" id="typingIndicator">
+            <span>Consultant is responding</span>
+            <div class="typing-dots">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+
+        <div class="status-bar" id="statusBar">
+            Ready to help you find the perfect water heater
+        </div>
+
+        <div class="chat-input">
+            <div class="input-group">
+                <input type="text" id="messageInput" placeholder="Type your message here..." maxlength="5000">
+                <button class="send-button" id="sendButton" onclick="sendMessage()">Send</button>
+                <button class="restart-button" onclick="restartChat()">Restart</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let isWaitingForResponse = false;
+        let conversationStarted = false;
+        const tableCSS = `
+            <style>
+            .table-container {
+                margin: 20px 0;
+                overflow-x: auto;
+                border-radius: 8px;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            }
+
+            .comparison-table {
+                width: 100%;
+                border-collapse: collapse;
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                background: white;
+                min-width: 800px;
+            }
+
+            .comparison-table th {
+                background: linear-gradient(135deg, #1e40af 0%, #1e0c83 100%);
+                color: white;
+                padding: 12px 8px;
+                text-align: left;
+                font-weight: 600;
+                font-size: 0.9em;
+                border-bottom: 2px solid #5a67d8;
+            }
+
+            .comparison-table td {
+                padding: 10px 8px;
+                border-bottom: 1px solid #e2e8f0;
+                vertical-align: middle;
+            }
+
+            .comparison-table tr:hover {
+                background-color: #f7fafc;
+            }
+
+            .system-name-cell {
+                font-weight: 600;
+                color: #2d3748;
+                background-color: #f8f9ff;
+            }
+
+            .cost-cell {
+                color: #c53030;
+                font-weight: 600;
+                text-align: right;
+            }
+
+            .emission-cell {
+                color: #38a169;
+                font-weight: 500;
+                text-align: right;
+            }
+
+            .number-cell {
+                text-align: center;
+                font-weight: 500;
+            }
+
+            .recommendation-header {
+                color: #2d3748;
+                border-bottom: 3px solid #667eea;
+                padding-bottom: 8px;
+                margin: 30px 0 20px 0;
+            }
+
+            .section-header {
+                color: #4a5568;
+                margin: 25px 0 15px 0;
+                border-left: 4px solid #667eea;
+                padding-left: 12px;
+            }
+
+            .emoji {
+                font-size: 1.2em;
+                margin-right: 8px;
+            }
+
+            /* Responsive design */
+            @media (max-width: 768px) {
+                .comparison-table {
+                    font-size: 0.8em;
+                    min-width: 600px;
+                }
+                
+                .comparison-table th,
+                .comparison-table td {
+                    padding: 8px 4px;
+                }
+            }
+            </style>
+            `;
+
+        // Initialize chat when page loads
+        document.addEventListener('DOMContentLoaded', function () {
+            startConversation();
+
+            // Add enter key support
+            document.getElementById('messageInput').addEventListener('keypress', function (e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                }
+            });
+        });
+        document.addEventListener('DOMContentLoaded', injectTableCSS);
+
+        function injectTableCSS() {
+            if (!document.getElementById('table-styles')) {
+                const styleElement = document.createElement('div');
+                styleElement.id = 'table-styles';
+                styleElement.innerHTML = tableCSS;
+                document.head.appendChild(styleElement.firstElementChild);
+            }
+        }
+
+        async function startConversation() {
+            try {
+                const response = await fetch('/chat/start', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                addMessage('assistant', data.message);
+                updateStatus('Conversation started - Ready for your questions');
+                conversationStarted = true;
+
+            } catch (error) {
+                console.error('Error starting conversation:', error);
+                addMessage('error', 'Failed to start conversation. Please refresh the page.');
+                updateStatus('Error: Failed to connect to server');
+            }
+        }
+
+        async function sendMessage() {
+            const messageInput = document.getElementById('messageInput');
+            const sendButton = document.getElementById('sendButton');
+            const message = messageInput.value.trim();
+
+            if (!message || isWaitingForResponse) {
+                return;
+            }
+
+            // Add user message to chat
+            addMessage('user', message);
+            messageInput.value = '';
+
+            // Show typing indicator
+            showTypingIndicator();
+
+            // Disable input
+            isWaitingForResponse = true;
+            sendButton.disabled = true;
+            messageInput.disabled = true;
+            updateStatus('AI is processing your message...');
+
+            try {
+                const response = await fetch('/chat/message', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        message: message
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                // Handle streaming response
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let assistantMessage = '';
+                let messageElement = null;
+
+                hideTypingIndicator();
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+
+                    const chunk = decoder.decode(value);
+                    const lines = chunk.split('\n');
+
+                    for (const line of lines) {
+                        if (line.startsWith('data: ')) {
+                            try {
+                                const data = JSON.parse(line.slice(6));
+
+                                if (data.error) {
+                                    throw new Error(data.error);
+                                }
+
+                                if (data.content) {
+                                    assistantMessage += data.content;
+
+                                    // Create or update message element
+                                    if (!messageElement) {
+                                        messageElement = addMessage('assistant', assistantMessage, true);
+                                    } else {
+                                        updateMessage(messageElement, assistantMessage);
+                                    }
+                                }
+
+                                if (data.done) {
+                                    updateStatus('Message complete - Ready for next question');
+                                    break;
+                                }
+
+                            } catch (e) {
+                                console.error('Error parsing SSE data:', e);
+                            }
+                        }
+                    }
+                }
+
+            } catch (error) {
+                console.error('Error sending message:', error);
+                hideTypingIndicator();
+                addMessage('error', 'Failed to send message. Please try again.');
+                updateStatus('Error: Failed to send message');
+            } finally {
+                // Re-enable input
+                isWaitingForResponse = false;
+                sendButton.disabled = false;
+                messageInput.disabled = false;
+                messageInput.focus();
+            }
+        }
+
+        function addMessage(type, content, isStreaming = false) {
+            const messagesContainer = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+
+            let avatarText = '';
+            let avatarClass = '';
+
+            if (type === 'user') {
+                avatarText = 'You';
+                avatarClass = 'user';
+            } else if (type === 'assistant') {
+                avatarText = 'AI';
+                avatarClass = 'assistant';
+            }
+
+            if (type === 'error') {
+                messageDiv.innerHTML = `
+                    <div class="error-message">
+                        <strong>Error:</strong> ${content}
+                    </div>
+                `;
+            } else {
+                messageDiv.innerHTML = `
+                    ${type !== 'user' ? `<div class="avatar ${avatarClass}">${avatarText}</div>` : ''}
+                    <div class="message-content" ${isStreaming ? 'id="streaming-message"' : ''}>
+                        ${formatMessage(content)}
+                    </div>
+                    ${type === 'user' ? `<div class="avatar ${avatarClass}">${avatarText}</div>` : ''}
+                `;
+            }
+
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+            return messageDiv;
+        }
+
+        function updateMessage(messageElement, content) {
+            const contentElement = messageElement.querySelector('.message-content');
+            if (contentElement) {
+                contentElement.innerHTML = formatMessage(content);
+                document.getElementById('chatMessages').scrollTop = document.getElementById('chatMessages').scrollHeight;
+            }
+        }
+
+        function formatMessage(content) {
+            // Convert markdown-like formatting to HTML
+            let formatted = content
+                // Headers
+                .replace(/^## (.*$)/gm, '<h2 class="recommendation-header">$1</h2>')
+                .replace(/^### (.*$)/gm, '<h3 class="section-header">$1</h3>')
+
+                // Bold and italic
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*(.*?)\*/g, '<em>$1</em>')
+
+                // Emoji headers
+                .replace(/🏆|🥇|📊|💡|🎯/g, '<span class="emoji">$&</span>');
+
+            // Convert markdown-style tables to HTML tables
+            const tableRegex = /\|(.+)\|\s*\n\|(.+)\|\s*\n((?:\|.+\|\s*\n*)+)/g;
+            formatted = formatted.replace(tableRegex, function (match, header, separator, rows) {
+                let tableHTML = '<div class="table-container"><table class="comparison-table">';
+
+                // Process header
+                const headerCells = header.split('|').map(cell => cell.trim()).filter(cell => cell);
+                tableHTML += '<thead><tr>';
+                headerCells.forEach(cell => {
+                    tableHTML += `<th>${cell}</th>`;
+                });
+                tableHTML += '</tr></thead>';
+
+                // Process rows
+                tableHTML += '<tbody>';
+                const rowLines = rows.trim().split('\n');
+                rowLines.forEach(row => {
+                    if (row.trim() && row.includes('|')) {
+                        const cells = row.split('|').map(cell => cell.trim()).filter(cell => cell);
+                        tableHTML += '<tr>';
+                        cells.forEach((cell, index) => {
+                            let cellClass = '';
+                            if (cell.includes('$') || cell.includes('/yr')) cellClass = 'cost-cell';
+                            else if (cell.includes('mt/yr')) cellClass = 'emission-cell';
+                            else if (cell.match(/^\d+(\.\d+)?$/)) cellClass = 'number-cell';
+                            else if (index === 0) cellClass = 'system-name-cell';
+
+                            tableHTML += `<td class="${cellClass}">${cell}</td>`;
+                        });
+                        tableHTML += '</tr>';
+                    }
+                });
+                tableHTML += '</tbody></table></div>';
+
+                return tableHTML;
+            });
+
+            // Handle bullet lists: group consecutive - items into a single <ul>
+            formatted = formatted.replace(/((?:^|\n)- .+?)+(?=\n[^-]|\n*$)/gs, match => {
+                const items = match.trim().split('\n').map(line => {
+                    return '<li>' + line.replace(/^- /, '') + '</li>';
+                }).join('');
+                return '<ul>' + items + '</ul>';
+            });
+
+            // Paragraph formatting (light)
+            formatted = formatted.replace(/\n\n+/g, '</p><p>');
+            formatted = formatted.replace(/\n/g, '<br>');
+
+            // Wrap remaining standalone text in <p> (optional)
+            if (formatted && !formatted.startsWith('<') && !formatted.includes('<ul') && !formatted.includes('<table')) {
+                formatted = '<p>' + formatted + '</p>';
+            }
+
+            return formatted;
+        }
+
+        function showTypingIndicator() {
+            document.getElementById('typingIndicator').style.display = 'flex';
+            document.getElementById('chatMessages').scrollTop = document.getElementById('chatMessages').scrollHeight;
+        }
+
+        function hideTypingIndicator() {
+            document.getElementById('typingIndicator').style.display = 'none';
+        }
+
+        function updateStatus(message) {
+            document.getElementById('statusBar').textContent = message;
+        }
+
+        async function restartChat() {
+            if (confirm('Are you sure you want to restart the conversation?')) {
+                // Clear messages
+                document.getElementById('chatMessages').innerHTML = '';
+
+                // Reset state
+                isWaitingForResponse = false;
+                conversationStarted = false;
+                document.getElementById('sendButton').disabled = false;
+                document.getElementById('messageInput').disabled = false;
+                document.getElementById('messageInput').value = '';
+
+                // Start new conversation
+                updateStatus('Restarting conversation...');
+                await startConversation();
+            }
+        }
+    </script>
+</body>
+
+</html>

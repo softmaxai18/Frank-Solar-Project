@@ -1,0 +1,16 @@
+Tankless or demand-type water heaters are rated by the maximum temperature rise possible at a given flow rate. Therefore, to size a demand water heater, you need to determine the flow rate and the temperature rise you'll need for its application (whole house or a remote application, such as just a bathroom) in your home.
+
+List the number of hot water devices you expect to use at any one time.
+ 
+Add up their flow rates (gallons per minute). This is the desired flow rate you'll want for the demand water heater. For example, let's say you expect to simultaneously run a hot water faucet with a flow rate of 0.75 gallons (2.84 liters) per minute and a shower head with a flow rate of 2.5 gallons (9.46 liters) per minute.
+ 
+If you don’t know the flow rate, estimate it by holding a pan or bucket under the faucet or shower head and measure the flow for a minute. The flow rate through the demand water heater should be at least 3.25 gallons (12.3 liters) per minute. To reduce flow rates, install low-flow water fixtures.
+ 
+To determine temperature rise, subtract the incoming water temperature from the desired output temperature. Unless you know otherwise, assume that the incoming water temperature is 50ºF (10ºC).
+
+You can also estimate the temperature by holding a thermometer under a cold-water faucet. For most uses, you'll want your water heated to 120ºF (49ºC). In this example, you'd need a demand water heater that produces a temperature rise of 70ºF (39ºC) for most uses.
+
+For dishwashers without internal heaters and other such applications, you might want your water heated at 140ºF (60ºC). In that case, you'll need a temperature rise of 90ºF (50ºC). Be cautious of a water temperature of 140ºF because it increases the possibility of scalding.
+Most demand water heaters are rated for a variety of inlet temperatures. Typically, a 70ºF (39ºC) water temperature rise is possible at a flow rate of 5 gallons per minute through gas-fired demand water heaters and 2 gallons per minute through electric ones. Faster flow rates or cooler inlet temperatures can sometimes reduce the water temperature at the most distant faucet.
+
+Some types of tankless water heaters are thermostatically controlled; they can vary their output temperature according to the water flow rate and inlet temperature.

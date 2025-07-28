@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Water Heater Type Recommendation System | Professional Consultation</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: #f9fafb;
+            color: #111827;
+            line-height: 1.5;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Floating Chat Toggle Button */
+        .chat-toggle {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background-color: #1e40af;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 999;
+            border: none;
+            transition: all 0.2s ease;
+        }
+
+        .chat-toggle:hover {
+            background-color: #1e3a8a;
+            transform: scale(1.05);
+        }
+
+        .chat-toggle svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        /* Chat Popup Container */
+        .chat-container {
+            position: fixed;
+            bottom: 100px;
+            right: 30px;
+            width: 400px;
+            height: 600px;
+            max-height: 80vh;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            border: 1px solid #e5e7eb;
+            transform: translateY(20px);
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .chat-container.visible {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .chat-header {
+            background: #1e40af;
+            color: white;
+            padding: 14px 16px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .chat-header h1 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .chat-header p {
+            opacity: 0.9;
+            font-size: 0.75rem;
+            font-weight: 400;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 10px 12px;
+            border-radius: 12px;
+            word-wrap: break-word;
+            animation: fadeIn 0.3s ease-out;
+            font-size: 0.875rem;
+            line-height: 1.5;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .message.consultant {
+            background-color: #f3f4f6;
+            color: #111827;
+            align-self: flex-start;
+            border-top-left-radius: 4px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .message.user {
+            background-color: #1e40af;
+            color: white;
+            align-self: flex-end;
+            border-top-right-radius: 4px;
+        }
+
+        .message.system {
+            background-color: #f9fafb;
+            color: #4b5563;
+            align-self: center;
+            font-size: 0.75rem;
+            max-width: 95%;
+            text-align: center;
+            border: 1px solid #e5e7eb;
+        }
+
+        .message-content {
+            line-height: 1.5;
+        }
+
+        .message-content h2 {
+            margin: 10px 0 6px 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: inherit;
+        }
+
+        .message-content h3 {
+            margin: 8px 0 4px 0;
+            font-size: 1rem;
+            font-weight: 600;
+            color: inherit;
+        }
+
+        .message-content strong {
+            font-weight: 600;
+        }
+
+        .message-content ul, .message-content ol {
+            margin: 6px 0;
+            padding-left: 20px;
+        }
+
+        .message-content li {
+            margin: 3px 0;
+        }
+
+        .chat-input-container {
+            padding: 12px;
+            background: #ffffff;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .chat-input-form {
+            display: flex;
+            gap: 8px;
+            align-items: flex-end;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 10px 12px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            outline: none;
+            transition: all 0.2s ease;
+            resize: none;
+            min-height: 40px;
+            max-height: 100px;
+            font-family: inherit;
+            background-color: #f9fafb;
+        }
+
+        .chat-input:focus {
+            border-color: #1e40af;
+            box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
+            background-color: #ffffff;
+        }
+
+        .send-button {
+            background-color: #1e40af;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            font-size: 1rem;
+        }
+
+        .send-button:hover:not(:disabled) {
+            background-color: #1e3a8a;
+        }
+
+        .send-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            background-color: #9ca3af;
+        }
+
+        .control-buttons {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 8px;
+            flex-wrap: wrap;
+        }
+
+        .control-button {
+            background-color: #ffffff;
+            color: #1e40af;
+            border: 1px solid #1e40af;
+            padding: 4px 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            transition: all 0.2s ease;
+            font-weight: 500;
+        }
+
+        .control-button:hover {
+            background-color: #f0f4ff;
+        }
+
+        .typing-indicator {
+            display: none;
+            align-items: center;
+            gap: 6px;
+            color: #6b7280;
+            font-size: 0.75rem;
+            margin: 6px 0;
+            padding: 0 12px;
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 3px;
+        }
+
+        .typing-dots span {
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: #9ca3af;
+            animation: bounce 1.4s infinite both;
+        }
+
+        .typing-dots span:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dots span:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes bounce {
+            0%, 80%, 100% {
+                transform: scale(0);
+            } 40% {
+                transform: scale(1);
+            }
+        }
+
+        .completion-notice {
+            background-color: #f0f4ff;
+            color: #1e40af;
+            padding: 10px 12px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-size: 0.75rem;
+            border: 1px solid #dbeafe;
+        }
+
+        .completion-notice strong {
+            font-weight: 600;
+        }
+
+        /* Scrollbar styling */
+        .chat-messages::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .chat-messages::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 10px;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: #9ca3af;
+            border-radius: 10px;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb:hover {
+            background: #6b7280;
+        }
+
+        /* Mobile responsiveness */
+        @media (max-width: 480px) {
+            .chat-container {
+                width: calc(100% - 40px);
+                right: 20px;
+                left: 20px;
+                bottom: 100px;
+            }
+            
+            .chat-toggle {
+                right: 20px;
+                bottom: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Floating Chat Toggle Button -->
+    <button class="chat-toggle" id="chatToggle">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+        </svg>
+    </button>
+
+    <!-- Chat Popup Container -->
+    <div class="chat-container" id="chatContainer">
+        <div class="chat-header">
+            <h1>Water Heater Recommendation</h1>
+            <p>Professional consultation for optimal solutions</p>
+        </div>
+        
+        <div class="chat-messages" id="chatMessages">
+            <div class="message system">
+                <div class="message-content">
+                    <strong>Welcome to the Water Heater Consultation</strong><br>
+                    I'll guide you to recommend the best water heating solution for your needs.
+                </div>
+            </div>
+        </div>
+        
+        <div class="typing-indicator" id="typingIndicator">
+            <span>Consultant is responding</span>
+            <div class="typing-dots">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+        
+        <div class="chat-input-container">
+            <div class="control-buttons">
+                <button class="control-button" onclick="restartConversation()">Restart</button>
+                <button class="control-button" onclick="forceRecommendations()">Get Recommendations</button>
+                <button class="control-button" onclick="clearChat()">Clear</button>
+            </div>
+            
+            <form class="chat-input-form" id="chatForm">
+                <textarea 
+                    class="chat-input" 
+                    id="messageInput" 
+                    placeholder="Type your response here..."
+                    rows="1"
+                    required
+                ></textarea>
+                <button type="submit" class="send-button" id="sendButton">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="22" y1="2" x2="11" y2="13"></line>
+                        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                    </svg>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let isConversationStarted = false;
+        let isComplete = false;
+
+        // Initialize chat toggle
+        const chatToggle = document.getElementById('chatToggle');
+        const chatContainer = document.getElementById('chatContainer');
+
+        // Show/hide chat
+        chatToggle.addEventListener('click', function() {
+            chatContainer.classList.toggle('visible');
+        });
+
+        // Close chat when clicking outside
+        document.addEventListener('click', function(event) {
+            if (!chatContainer.contains(event.target) && 
+                event.target !== chatToggle && 
+                !chatToggle.contains(event.target)) {
+                chatContainer.classList.remove('visible');
+            }
+        });
+
+        // Auto-resize textarea
+        const messageInput = document.getElementById('messageInput');
+        messageInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 100) + 'px';
+        });
+
+        // Handle Enter key (with Shift+Enter for new line)
+        messageInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                document.getElementById('chatForm').dispatchEvent(new Event('submit'));
+            }
+        });
+
+        // Start conversation on page load
+        window.addEventListener('load', function() {
+            setTimeout(() => {
+                chatContainer.classList.add('visible');
+                startConversation();
+            }, 1000);
+        });
+
+        async function startConversation() {
+            try {
+                const response = await fetch('/chat/start', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'ngrok-skip-browser-warning': 'true'
+                    }
+                });
+                const data = await response.json();
+                
+                if (data.message) {
+                    addMessage(data.message, 'consultant');
+                    isConversationStarted = true;
+                    isComplete = data.is_complete || false;
+                }
+            } catch (error) {
+                console.error('Error starting conversation:', error);
+                addMessage('Sorry, there was an error. Please refresh and try again.', 'consultant');
+            }
+        }
+
+        // Handle form submission
+        document.getElementById('chatForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const message = messageInput.value.trim();
+            if (!message) return;
+            
+            addMessage(message, 'user');
+            messageInput.value = '';
+            messageInput.style.height = 'auto';
+            
+            setInputDisabled(true);
+            showTypingIndicator();
+            
+            try {
+                const response = await fetch('/chat/message', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'ngrok-skip-browser-warning': 'true' 
+                    },
+                    body: JSON.stringify({ message: message })
+                });
+                
+                if (!response.ok) throw new Error('Network response was not ok');
+                
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let assistantMessage = '';
+                let messageElement = null;
+                
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    
+                    const chunk = decoder.decode(value);
+                    const lines = chunk.split('\n\n');
+                    
+                    for (const line of lines) {
+                        if (line.startsWith('data: ')) {
+                            try {
+                                const data = JSON.parse(line.slice(6));
+                                
+                                if (data.error) {
+                                    hideTypingIndicator();
+                                    addMessage(data.error, 'consultant');
+                                    return;
+                                }
+                                
+                                if (data.content) {
+                                    assistantMessage += data.content;
+                                    
+                                    if (!messageElement) {
+                                        hideTypingIndicator();
+                                        messageElement = createStreamingMessage('consultant');
+                                    }
+                                    
+                                    updateStreamingMessage(messageElement, assistantMessage);
+                                }
+                                
+                                if (data.done && data.full_response) {
+                                    if (messageElement) {
+                                        updateStreamingMessage(messageElement, data.full_response);
+                                    }
+                                    
+                                    isComplete = data.is_complete || false;
+                                    if (isComplete) {
+                                        showCompletionNotice();
+                                    }
+                                }
+                            } catch (parseError) {
+                                console.error('Error parsing streaming data:', parseError);
+                            }
+                        }
+                    }
+                }
+                
+            } catch (error) {
+                console.error('Error sending message:', error);
+                hideTypingIndicator();
+                addMessage('Sorry, there was an error. Please try again.', 'consultant');
+            } finally {
+                setInputDisabled(false);
+                messageInput.focus();
+            }
+        });
+
+        function addMessage(content, sender) {
+            const messagesContainer = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}`;
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            contentDiv.innerHTML = formatMessage(content);
+            
+            messageDiv.appendChild(contentDiv);
+            messagesContainer.appendChild(messageDiv);
+            
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            
+            return messageDiv;
+        }
+
+        function createStreamingMessage(sender) {
+            const messagesContainer = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}`;
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            contentDiv.innerHTML = '';
+            
+            messageDiv.appendChild(contentDiv);
+            messagesContainer.appendChild(messageDiv);
+            
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            
+            return messageDiv;
+        }
+
+        function updateStreamingMessage(messageElement, content) {
+            const contentDiv = messageElement.querySelector('.message-content');
+            contentDiv.innerHTML = formatMessage(content);
+            
+            const messagesContainer = document.getElementById('chatMessages');
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function formatMessage(content) {
+            let formatted = content
+                .replace(/^### (.*$)/gm, '<h3>$1</h3>')
+                .replace(/^## (.*$)/gm, '<h2>$1</h2>')
+                .replace(/^# (.*$)/gm, '<h1>$1</h1>')
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                .replace(/^\d+\.\s+\*\*(.*?)\*\*/gm, '<div class="ranked-item"><strong>$1</strong></div>')
+                .replace(/^-\s+(.*$)/gm, '<li>$1</li>')
+                .replace(/\n\n/g, '<br><br>')
+                .replace(/\n/g, '<br>');
+            
+            formatted = formatted.replace(/(<li>.*?<\/li>(?:\s*<br>\s*<li>.*?<\/li>)*)/gs, '<ul>$1</ul>');
+            
+            return formatted;
+        }
+
+        function showTypingIndicator() {
+            document.getElementById('typingIndicator').style.display = 'flex';
+        }
+
+        function hideTypingIndicator() {
+            document.getElementById('typingIndicator').style.display = 'none';
+        }
+
+        function setInputDisabled(disabled) {
+            const messageInput = document.getElementById('messageInput');
+            const sendButton = document.getElementById('sendButton');
+            
+            messageInput.disabled = disabled;
+            sendButton.disabled = disabled;
+            
+            if (disabled) {
+                messageInput.placeholder = 'Please wait...';
+            } else {
+                messageInput.placeholder = 'Type your response here...';
+            }
+        }
+
+        function showCompletionNotice() {
+            if (document.querySelector('.completion-notice')) return;
+
+            const messagesContainer = document.getElementById('chatMessages');
+            const noticeDiv = document.createElement('div');
+            noticeDiv.className = 'completion-notice';
+            noticeDiv.innerHTML = `
+                <strong>Consultation Complete</strong><br>
+                Your recommendations are ready. You may:
+                <ul>
+                    <li>Request additional details</li>
+                    <li>Start a new consultation</li>
+                    <li>Ask follow-up questions</li>
+                </ul>
+            `;
+            
+            messagesContainer.appendChild(noticeDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        async function restartConversation() {
+            try {
+                const response = await fetch('/chat/start', {
+                    method: 'POST',
+                    headers: {
+                        'ngrok-skip-browser-warning': 'true'
+                    }
+                });
+                const data = await response.json();
+                
+                const messagesContainer = document.getElementById('chatMessages');
+                const messages = messagesContainer.querySelectorAll('.message:not(.system)');
+                messages.forEach(msg => msg.remove());
+                
+                const notices = messagesContainer.querySelectorAll('.completion-notice');
+                notices.forEach(notice => notice.remove());
+                
+                if (data.message) {
+                    addMessage(data.message, 'consultant');
+                    isComplete = false;
+                }
+                
+                const messageInput = document.getElementById('messageInput');
+                messageInput.value = '';
+                messageInput.focus();
+                
+            } catch (error) {
+                console.error('Error restarting conversation:', error);
+                addMessage('Sorry, there was an error. Please try again.', 'consultant');
+            }
+        }
+
+        async function forceRecommendations() {
+            const messageInput = document.getElementById('messageInput');
+            messageInput.value = 'Please provide your recommendations based on the information provided';
+            document.getElementById('chatForm').dispatchEvent(new Event('submit'));
+        }
+
+        function clearChat() {
+            const messagesContainer = document.getElementById('chatMessages');
+            const messages = messagesContainer.querySelectorAll('.message:not(.system)');
+            messages.forEach(msg => msg.remove());
+            
+            const notices = messagesContainer.querySelectorAll('.completion-notice');
+            notices.forEach(notice => notice.remove());
+            
+            isComplete = false;
+            
+            setTimeout(() => {
+                restartConversation();
+            }, 100);
+        }
+
+        // Focus input when chat opens
+        chatToggle.addEventListener('click', function() {
+            if (chatContainer.classList.contains('visible')) {
+                setTimeout(() => {
+                    document.getElementById('messageInput').focus();
+                }, 300);
+            }
+        });
+    </script>
+</body>
+</html>

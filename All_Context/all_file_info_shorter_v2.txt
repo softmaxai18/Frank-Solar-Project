@@ -1,0 +1,28 @@
+Water Heater Types & Selection Guide
+
+1. Solar Water Heaters
+Active Systems: Direct circulation (pumps water through collectors) or indirect (heat-transfer fluid). Passive Systems: Integral collector-storage or thermosyphon (40-gal capacity). Collectors: Flat-plate (glazed/unglazed), integral collector-storage, evacuated-tube. Sizing: 20 sq ft + 8 sq ft per person (Sun Belt) or +12-14 sq ft (northern US). Storage: 50-60 gal (1-2 people), 80 gal (3-4 people). Maintenance: Minimal for passive, regular for active every 3-5 years.
+
+2. Tankless/Demand Water Heaters
+Operation: Heat water instantly via gas burner or electric element. Flow: 2-5 GPM (gas higher). Efficiency: 24-34% more efficient for ≤41 gal/day use, 8-14% for ~86 gal/day. Lifespan: 20+ years vs 10-15 for storage. Sizing: Calculate simultaneous usage flow rates, temperature rise (typically 70°F), rated at 5 GPM (gas) or 2 GPM (electric).
+
+3. Heat Pump Water Heaters
+Operation: Move heat from air (2-3x more efficient than electric resistance). Requirements: 40-90°F ambient, 1,000+ cubic feet space. Types: Stand-alone, retrofit, combination systems, geothermal with desuperheater. Efficiency: Highest energy efficiency but higher upfront cost, less effective in cold/high-demand situations.
+
+4. Storage Water Heaters
+Capacity: 20-80 gallons ready reservoir. Fuel: Natural gas, propane, fuel oil, electricity. Insulation: Look for R-24+ to reduce standby losses. Sizing: Use first-hour rating matched to peak demand. Maintenance: Flush quarterly, check T&P valve every 6 months, inspect anode rod every 3-4 years.
+
+5. Tankless Coil & Indirect Water Heaters
+Tankless Coil: Heat via main furnace/boiler coil, efficient in cold months only. Indirect: Use storage tank with heat exchanger, more efficient overall, work with various fuel types. Combination Systems: CAE rating 0.59-0.90 (higher better), lower installation/maintenance costs.
+
+6. Selection Criteria
+Fuel Types: Electricity (widely available), natural gas, propane, fuel oil, solar, geothermal. Efficiency Rating: Uniform Energy Factor (UEF) - higher is better, compare within same usage bin (Very Small 10 gal/day, Low 38, Medium 55, High 84). Costs: Compare Energy Guide labels for annual operating costs.
+
+7. Sizing Guidelines
+Storage/Heat Pump: Match first-hour rating to peak demand. Usage Estimates: Shower 20 gal, dishwashing 7 gal, clothes washer 25 gal (top-loader)/15 gal (H-axis). Tankless: Add simultaneous flow rates, calculate temperature rise. Solar: See section 1 sizing details.
+
+8. Technology Details
+Heat Pump: R-134a refrigerant, vapor-compression cycle, loses efficiency below 40°F. Tankless: Flow sensors, control modules; electric uses serpentine coils, gas uses burner/heat exchanger. Storage: Insulated tank, dip tube, heating elements/burners, T&P relief valve, anode rod for corrosion protection.
+
+9. Installation & Maintenance
+Professional Installation: Recommended for all types due to complexity, safety, code compliance. Contractor Selection: Get written estimates, check references and Better Business Bureau. Maintenance: Extends life and efficiency - varies by system type, generally every 3-5 years for active systems.

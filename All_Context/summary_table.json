@@ -1,0 +1,74 @@
+[
+  {
+    "System Type": "Electric Tank",
+    "Yearly Cost ($/yr)": 618.92,
+    "Affordability Ranking": 1.57,
+    "Fuel Type": "Electricity",
+    "Fuel Supply (yrs)": 88.48,
+    "Abundance Ranking": 4.47,
+    "CO2e Emissions (mt/yr)": 0.90,
+    "Environmental Impact Ranking": 1.07,
+    "Complexity": 5,
+    "Reliability Ranking": 4.17
+  },
+  {
+    "System Type": "Electric Tankless",
+    "Yearly Cost ($/yr)": 670.82,
+    "Affordability Ranking": 1,
+    "Fuel Type": "Electricity",
+    "Fuel Supply (yrs)": 88.48,
+    "Abundance Ranking": 4.47,
+    "CO2e Emissions (mt/yr)": 0.91,
+    "Environmental Impact Ranking": 1,
+    "Complexity": 3,
+    "Reliability Ranking": 2.5
+  },
+  {
+    "System Type": "Heat Pump",
+    "Yearly Cost ($/yr)": 517.48,
+    "Affordability Ranking": 2.69,
+    "Fuel Type": "Electricity",
+    "Fuel Supply (yrs)": 88.48,
+    "Abundance Ranking": 4.47,
+    "CO2e Emissions (mt/yr)": 0.48,
+    "Environmental Impact Ranking": 3.92,
+    "Complexity": 2,
+    "Reliability Ranking": 1.67
+  },
+  {
+    "System Type": "Natural Gas Tank",
+    "Yearly Cost ($/yr)": 336.97,
+    "Affordability Ranking": 4.69,
+    "Fuel Type": "Natural Gas",
+    "Fuel Supply (yrs)": 86.12,
+    "Abundance Ranking": 4.36,
+    "CO2e Emissions (mt/yr)": 0.87,
+    "Environmental Impact Ranking": 1.27,
+    "Complexity": 6,
+    "Reliability Ranking": 5
+  },
+  {
+    "System Type": "Natural Gas Tankless",
+    "Yearly Cost ($/yr)": 308.86,
+    "Affordability Ranking": 5,
+    "Fuel Type": "Natural Gas",
+    "Fuel Supply (yrs)": 86.12,
+    "Abundance Ranking": 4.36,
+    "CO2e Emissions (mt/yr)": 0.54,
+    "Environmental Impact Ranking": 3.51,
+    "Complexity": 4,
+    "Reliability Ranking": 3.33
+  },
+  {
+    "System Type": "Active Solar",
+    "Yearly Cost ($/yr)": 636.99,
+    "Affordability Ranking": 1.37,
+    "Fuel Type": "The Sun",
+    "Fuel Supply (yrs)": 100,
+    "Abundance Ranking": 5,
+    "CO2e Emissions (mt/yr)": 0.32,
+    "Environmental Impact Ranking": 5,
+    "Complexity": 1,
+    "Reliability Ranking": 1
+  }
+]

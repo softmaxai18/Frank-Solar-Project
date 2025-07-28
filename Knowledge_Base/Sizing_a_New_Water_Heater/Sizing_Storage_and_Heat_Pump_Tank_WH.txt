@@ -1,0 +1,33 @@
+To properly size a storage water heater for your home -- including a heat pump water heater with a tank -- use the water heater's first hour rating. The first hour rating is the number of gallons of hot water the heater can supply per hour (starting with a tank full of hot water). It depends on the tank capacity, source of heat (burner or element), and the size of the burner or element.
+
+The EnergyGuide label lists the first hour rating in the top left corner as "Capacity (first hour rating)." The Federal Trade Commission requires an EnergyGuide label on all new conventional storage water heaters but not on heat pump water heaters. Product literature from a manufacturer may also provide the first hour rating. Look for water heater models with a first hour rating that at least matches within your peak hour demand (the highest energy use during a single 1-hour period for your home).
+
+To estimate your peak hour demand:
+
+Determine what time of day (morning, noon, evening) you use the highest amount of hot water in your home. Keep in mind the number of people living in your home.
+Use the worksheet below to estimate your maximum usage of hot water during this one-hour period of the day—this is your peak hour demand. Note: the worksheet does not estimate total daily hot water usage.
+The worksheet example shows a total peak hour demand of 66 gallons. Therefore, this household would need a water heater model with a first hour rating of 66 gallons or more.
+
+Worksheet for Estimating Peak Hour Demand/First Hour Rating
+Average gallons of hot water per usage
+20
+2
+Times used during 1
+hour
+Use
+Gallons used in 1 hour
+Shower
+Shaving (.05 gallon per minute)
+Hand dishwashing or food prep (2 gallons per minute)
+Automatic dishwasher
+Clothes washer
+=
+3
+7
+- Top-loader
+- H-Axis
+25
+15
+Total Peak Hour
+Demand
+=

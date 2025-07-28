@@ -1,0 +1,6 @@
+There are two types of active solar water heating systems:
+
+Direct circulation systems
+Pumps circulate household water through the collectors and into the home. They work well in climates where it rarely freezes.
+Indirect circulation systems
+Pumps circulate a non-freezing, heat-transfer fluid through the collectors and a heat exchanger. This heats the water that then flows into the home. They are popular in climates prone to freezing temperatures.

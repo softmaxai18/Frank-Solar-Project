@@ -1,0 +1,12 @@
+Sizing your solar water heating system basically involves determining the total collector area and the storage volume you'll need to meet 90%–100% of your household's hot water needs during the summer. Solar system contractors use worksheets and computer programs to help determine system requirements and collector sizing.
+
+Collector Area
+Contractors usually follow a guideline of around 20 square feet (2 square meters) of collector area for each of the first two family members. For every additional person, add 8 square feet (0.7 square meters) if you live in the U.S. Sun Belt area or 12–14 square feet if you live in the northern United States.
+
+Storage Volume
+A small (50- to 60-gallon) storage tank is usually sufficient for one to two three people. A medium (80-gallon) storage tank works well for three to four people. A large tank is appropriate for four to six people.
+
+For active systems, the size of the solar storage tank increases with the size of the collector -- typically 1.5 gallons per square foot of collector. This helps prevent the system from overheating when the demand for hot water is low. In very warm, sunny climates, some experts suggest that the ratio should be increased to as much as 2 gallons of storage to 1 square foot of collector area.
+
+Other Calculations
+Additional calculations involved in sizing your solar water heating system include evaluating your building site's solar resource and determining the proper orientation and tilt of the solar collector. Visit the solar water heaters page for more on these calculations.

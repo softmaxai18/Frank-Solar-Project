@@ -1,0 +1,257 @@
+1. Solar Water Heaters
+
+How They Work
+- Include storage tanks and solar collectors
+- Two types: active (with circulating pumps and controls) and passive (without)
+
+Active Solar Water Heating Systems
+- Direct circulation systems: Pumps circulate household water through collectors - work well where it rarely freezes
+- Indirect circulation systems: Pumps circulate non-freezing heat-transfer fluid through collectors and heat exchanger - popular in freeze-prone climates
+
+Passive Solar Water Heating Systems
+- Less expensive than active systems but usually less efficient
+- More reliable and may last longer
+- Integral collector-storage systems: Storage tank covered with transparent material, works best where temperatures rarely fall below freezing
+- Thermosyphon systems: Water heated in roof collector, flows through plumbing when faucet opened, typically 40-gallon capacity
+
+Storage Tanks and Solar Collectors
+- Most require well-insulated storage tank with additional outlet/inlet for collector
+- Two-tank systems: Solar preheats water before conventional heater
+- One-tank systems: Backup heater combined with solar storage
+
+Three collector types:
+- Flat-plate collector: Glazed (insulated weatherproofed boxes with dark absorber plate under glass/plastic covers) or unglazed (for pool heating)
+- Integral collector-storage (ICS/batch systems): Black tanks/tubes in insulated glazed box, install only in mild-freeze climates
+- Evacuated-tube collectors: Parallel rows of glass tubes with metal absorber tubes, used more in commercial applications
+
+Selecting a Solar Water Heater
+Before purchase:
+- Estimate cost and energy efficiency
+- Evaluate site's solar resource
+- Determine correct system size
+- Investigate local codes and regulations
+- Understand heat exchangers and heat-transfer fluids
+
+Installing and Maintaining
+- Best to use qualified solar thermal contractor due to complexity
+- Passive systems need minimal maintenance
+- Active systems require discussion with provider about maintenance
+- Glazing may need cleaning in dry climates
+- Regular maintenance every 3-5 years for simple systems
+- Systems with electrical components may need parts replaced after 10 years
+
+Sizing Solar Water Heating Systems
+- Collector Area: ~20 sq ft for first two family members, +8 sq ft each additional person (Sun Belt) or +12-14 sq ft (northern US)
+- Storage Volume: 50-60 gallons (1-2 people), 80 gallons (3-4 people), large tank (4-6 people)
+- Active systems: 1.5 gallons per sq ft of collector, up to 2 gallons in very warm climates
+
+Improving Energy Efficiency
+- Try additional energy-saving strategies after proper installation
+- Some devices more cost-effective when installed with water heater
+
+2. Tankless/Demand-Type Water Heaters
+
+Mechanics
+- Heat water instantaneously without storage tank
+- When hot water faucet turned on, cold water flows through heat exchanger
+- Natural gas burner or electric element heats water
+- Deliver constant supply at 2-5 gallons per minute (gas higher than electric)
+- Large households may need multiple units for simultaneous use
+
+Pros and Cons
+- Efficiency: 24-34% more efficient for homes using ≤41 gallons/day, 8-14% more for ~86 gallons/day
+- Costs: Higher initial cost but longer life (20+ years vs 10-15 for storage), lower operating costs
+- Drawbacks: Gas models may waste energy with pilot light (look for intermittent ignition device)
+
+Installation
+- Professional installation recommended due to complexity
+- Select contractor with written estimates, references, Better Business Bureau check
+- Periodic maintenance significantly extends life
+
+Selecting Demand Water Heaters
+Consider:
+- Size and flow rate requirements
+- Fuel type and availability
+- Energy efficiency (energy factor)
+- Costs
+
+Sizing Tankless Water Heaters
+1. List hot water devices expected to use simultaneously
+2. Add up flow rates (gallons per minute) - this is desired flow rate
+3. Determine temperature rise: subtract incoming water temperature (assume 50°F) from desired output (typically 120°F, 140°F for dishwashers)
+4. Most demand heaters rated for 70°F rise at 5 GPM (gas) or 2 GPM (electric)
+
+Improving Energy Efficiency
+- Additional energy-saving strategies after proper installation
+- Some devices more cost-effective when installed with water heater
+
+3. Heat Pump Water Heaters
+
+How They Work
+- Use electricity to move heat rather than generate it directly
+- 2-3 times more efficient than conventional electric resistance heaters
+- Work like refrigerator in reverse
+- Pull heat from surrounding air, transfer at higher temperature to heat water
+- Require 40-90°F ambient temperature and 1,000+ cubic feet air space
+- Cool the space they're in, work better in spaces with excess heat
+
+Types:
+- Stand-alone air-source: Integrated unit with built-in tank and backup elements
+- Retrofit: Can work with existing conventional tank
+- Combination systems: Heating, cooling, and water heating
+- Geothermal with desuperheater: Uses superheated gases from heat pump compressor
+
+Selecting Heat Pump Water Heaters
+- Higher initial costs but lower operating costs
+- Consider size, first-hour rating, and energy efficiency
+- Heat Pump Water Heater Installation Tool available for guidance
+
+Installation and Maintenance
+- Professional installation recommended
+- Select qualified contractor with written estimates, references, Better Business Bureau check
+- Periodic maintenance extends life and minimizes efficiency loss
+
+Improving Energy Efficiency
+- Additional energy-saving strategies after proper installation
+- Some devices more cost-effective when installed with water heater
+
+4. Storage Water Heaters
+
+How They Work
+- Ready reservoir of 20-80 gallons hot water
+- Hot water released from top, cold enters bottom through dip tube
+- Fuel sources: natural gas, propane, fuel oil, electricity
+- Energy waste from standby heat losses
+- Gas/oil models have venting-related losses
+- Look for R-24+ insulation to reduce standby losses
+
+Selecting Storage Water Heaters
+- Don't choose cheapest - consider lifetime costs
+- Avoid oversizing (higher costs, more standby losses)
+- Consider size, first-hour rating, fuel type, energy efficiency, costs
+
+Installation and Maintenance
+- Professional installation recommended for safety and code compliance
+- Select contractor with written estimates, references, Better Business Bureau check
+- Routine maintenance: Flush quart of water every 3 months, check T&P valve every 6 months, inspect anode rod every 3-4 years
+
+Improving Energy Efficiency
+- Additional energy-saving strategies after proper installation
+- Some devices more cost-effective when installed with water heater
+
+5. Tankless Coil and Indirect Water Heaters
+
+Tankless Coil Water Heaters
+- Provide hot water on demand without tank
+- Water heated as it flows through coil/heat exchanger in main furnace/boiler
+- Most efficient during cold months when heating system used regularly
+- Can be inefficient in warmer climates
+- Work with forced air and hydronic/radiant floor systems
+
+Indirect Water Heaters
+- More efficient choice for most homes despite requiring storage tank
+- Use main furnace/boiler to heat fluid circulated through heat exchanger in storage tank
+- Energy stored by tank allows furnace to cycle less frequently
+- Can be least expensive means of providing hot water with high-efficiency boiler
+- Can be fired by gas, oil, propane, electric, solar, or combinations
+
+Combination Water and Space Heating
+- Usually cost more than separate systems but lower installation/maintenance costs
+- Fewer utility connections and moving parts
+- Most designed for new construction, some retrofit units available
+- Use Combined Appliance Efficiency (CAE) rating: 0.59-0.90, higher is better
+
+Installation and Maintenance
+- Professional installation recommended
+- Select contractor with written estimates, references, Better Business Bureau check
+- Periodic maintenance extends life and minimizes efficiency loss
+
+Improving Energy Efficiency
+- Additional energy-saving strategies for both water heating and space heating/cooling
+
+6. Selecting a New Water Heater
+
+Selection Criteria
+- Fuel type: Affects operating costs, size, and efficiency
+- Size: Need proper sizing for adequate hot water and maximum efficiency
+- Energy efficiency: Check before purchase to maximize savings
+- Costs: Estimate annual operating costs and compare models
+
+Types of Water Heaters
+- Conventional storage: Ready reservoir adequate for everyday use
+- Tankless/demand-type: Heat water directly without storage tank
+- Heat pump: Move heat instead of generating it, high efficiency and cost savings
+- Solar: Use sun's heat, save money on energy bills
+- Tankless coil and indirect: Use home's space heating system
+
+Fuel Costs and Types
+Available fuel types:
+- Electricity: Widely available for conventional, tankless, heat pump systems
+- Natural gas: Available in many areas for conventional, demand, combination systems
+- Propane: Available in many areas for conventional, demand, indirect systems
+- Fuel oil: Available in some areas for conventional, indirect systems
+- Solar energy: Available throughout US, most abundant in Southwest
+- Geothermal: Available to those with geothermal heat pump systems
+
+Comparing Fuel Costs
+- Compare fuel costs if multiple types available
+- Consider conversion costs (electrical work, gas lines, venting)
+- Type of water heater affects fuel efficiency
+- Electric heat pump may have lower costs than gas conventional despite higher electricity rates
+
+7. Sizing Water Heaters
+
+Sizing Storage and Heat Pump Tank Water Heaters
+- Use first hour rating (gallons of hot water per hour starting with full tank)
+- Match first hour rating to peak hour demand
+- Peak hour demand calculation: Determine highest usage time, estimate maximum hot water use during that hour
+- Usage estimates: Shower (20 gal), Shaving (2 gal), Dishwashing (7 gal), Automatic dishwasher (7 gal), Clothes washer (25 gal top-loader/15 gal H-axis)
+
+Sizing Tankless Water Heaters
+1. List simultaneous hot water devices
+2. Add flow rates (GPM) for desired flow rate
+3. Calculate temperature rise (output temp - input temp)
+4. Most heaters rated for 70°F rise at 5 GPM (gas) or 2 GPM (electric)
+
+Sizing Solar Water Heating Systems
+- Collector area: 20 sq ft for first two people, +8 sq ft each additional (Sun Belt) or +12-14 sq ft (northern US)
+- Storage volume: 50-60 gal (1-2 people), 80 gal (3-4 people), large tank (4-6 people)
+- Active systems: 1.5-2 gallons storage per sq ft collector
+
+8. Costs and Efficiency
+
+Energy Efficiency Ratings
+- Uniform Energy Factor (UEF): Higher means more efficient
+- Water heaters assigned to bins based on usage patterns
+- Bins: Very Small (10 gal/day), Low (38 gal/day), Medium (55 gal/day), High (84 gal/day)
+- Can only compare UEF within same bin
+- Consider size, first-hour rating, fuel type, and overall cost - not just energy factor
+
+Cost Efficiency Information
+- Energy Guide labels show estimated yearly energy cost and usage
+- Compare costs between models to determine savings and payback period
+- Higher efficiency models may have higher purchase price but lower operating costs
+
+9. Technical Details
+
+Heat Pump Water Heater Technology
+- Vapor-compression refrigeration cycle using R-134a refrigerant
+- Highest energy efficiency and low operating costs
+- Less effective for high-demand usage, high upfront cost
+- Not ideal for cold environments (loses efficiency below 40°F)
+
+Tank-Less Water Heater Technology
+- Compact wall-hung units with flow sensors and control modules
+- Electric: serpentine pipes with resistive heating coils
+- Gas: fan, gas valve, ignitor, burner, serpentine heat exchanger
+- Optional condensing units for additional efficiency
+- Space-saving, no waiting time, but high upfront cost and may struggle with simultaneous usage
+
+Tank Water Heater Technology
+- Large insulated tank with dip tube for cold water entry
+- Electric: 1-2 resistive heating coils with thermostats
+- Gas: bottom burner with thermocouple, control valve, gas shutoff
+- Draft hood/diverter or power vent for exhaust
+- Optional condensing units for additional efficiency
+- Safety: temperature/pressure relief valve, anode rod for corrosion protection
+- Simple, low upfront cost, but standby losses and large footprint
