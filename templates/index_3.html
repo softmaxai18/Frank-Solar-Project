@@ -488,6 +488,7 @@
 
         async function startConversation() {
             try {
+                document.getElementById('chatMessages').innerHTML = '';
                 const response = await fetch('/chat/start', {
                     method: 'POST',
                     headers: {
