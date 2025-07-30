@@ -472,7 +472,7 @@ def check_trigger_conditions(state: GraphState) -> GraphState:
     messages = state.get("messages", [])
     
     # More strict requirements: at least 8 turns AND sufficient info
-    if turn_count >= 8 and has_sufficient_info(messages):
+    if turn_count >= 9 and has_sufficient_info(messages):
         logger.info(f"Sufficient info gathered after {turn_count} turns")
         result = {**state, "decision": "recommend_types"}
         log_state(result, "check_trigger_conditions", "OUT")
@@ -504,12 +504,13 @@ async def generate_recommendation(state: GraphState) -> GraphState:
     try:
         # Add recommendation trigger to conversation
         system_prompt = """
-                The task requires generating recommendations for six types of water heating systems based on their performance across several categories. Your response must be formatted as JSON, focusing on each heater's rank across the specified factors.
+                The user has provided sufficient information about their situation, priorities, and constraints. 
+                Now provide comprehensive recommendations in JSON for all 6 water heater type systems.
 
                 KEY SYSTEM DATA:
                 Utilize this information to form your recommendations.
 
-                | System Type           | Annual Cost | Affordability Rank | Fuel Type    | Fuel Supply | Abundance Rank | CO2 Emissions | Environmental Rank | Complexity | Reliability Rank |
+                | System Type           | Annual Cost | Affordability Rank| Fuel Type    | Fuel Supply | Abundance Rank | CO2 Emissions | Environmental Rank | Complexity | Reliability Rank |
                 |-----------------------|-------------|-------------------|--------------|-------------|----------------|---------------|-------------------|------------|------------------|
                 | Electric Tank         | $618.92/yr  | 1.57              | Electricity  | 88.48 yrs   | 4.47           | 0.90 mt/yr    | 1.07              | 5          | 4.17             |
                 | Electric Tankless     | $670.82/yr  | 1.00              | Electricity  | 88.48 yrs   | 4.47           | 0.91 mt/yr    | 1.00              | 3          | 2.50             |
@@ -518,6 +519,7 @@ async def generate_recommendation(state: GraphState) -> GraphState:
                 | Natural Gas Tankless  | $308.86/yr  | 5.00              | Natural Gas  | 86.12 yrs   | 4.36           | 0.54 mt/yr    | 3.51              | 4          | 3.33             |
                 | Active Solar          | $636.99/yr  | 1.37              | Solar Energy | 100.00 yrs  | 5.00           | 0.32 mt/yr    | 5.00              | 1          | 1.00             |
 
+                Ranking Scale: Higher numbers = Better performance (except for Annual Cost and CO2 Emissions where lower is better)
                 For recommendations, consider the following factors:
 
                 FUEL TYPE PRIORITY HIERARCHY:
@@ -526,7 +528,7 @@ async def generate_recommendation(state: GraphState) -> GraphState:
                 - Natural Gas (Natural Gas Tank, Natural Gas Tankless)
                 - Solar (Active Solar)
                 - Local fuel availability
-                - Long-term cost trends
+                - Fuel cost and long-term pricing trends
 
                 2. Additional Considerations:
                 - Installation complexity
@@ -534,13 +536,20 @@ async def generate_recommendation(state: GraphState) -> GraphState:
                 - Environmental impact prioritization
                 - Reliability and maintenance implications
 
+                Important:
+                - Ensure the JSON structure is strictly adhered to.
+                - Infer ranks based on the data provided without copying values directly.
+                - Use User's context to inform recommendations.
+                - Base decision-making on fuel type suitability and system performance in context.
+                - Validate the JSON format before submission.
+                - Convert all numerical values to appropriate ranks based on the provided data.
+
                 The response MUST adhere to the following JSON format without any extra text:
 
                 {
                     "categories": [
                         "Affordability Rank",
                         "Annual Cost",
-                        "Fuel Supply",
                         "Abundance Rank",
                         "Environmental Rank",
                         "CO₂ Emissions",
@@ -548,21 +557,14 @@ async def generate_recommendation(state: GraphState) -> GraphState:
                         "Complexity"
                     ],
                     "heaters": {
-                        "Electric Tank":        [?, ?, ?, ?, ?, ?, ?, ?],
-                        "Electric Tankless":    [?, ?, ?, ?, ?, ?, ?, ?],
-                        "Heat Pump":            [?, ?, ?, ?, ?, ?, ?, ?],
-                        "Natural Gas Tank":     [?, ?, ?, ?, ?, ?, ?, ?],
-                        "Natural Gas Tankless": [?, ?, ?, ?, ?, ?, ?, ?],
-                        "Active Solar":         [?, ?, ?, ?, ?, ?, ?, ?]
+                        "Electric Tank":        [?, ?, ?, ?, ?, ?, ?],
+                        "Electric Tankless":    [?, ?, ?, ?, ?, ?, ?],
+                        "Heat Pump":            [?, ?, ?, ?, ?, ?, ?],
+                        "Natural Gas Tank":     [?, ?, ?, ?, ?, ?, ?],
+                        "Natural Gas Tankless": [?, ?, ?, ?, ?, ?, ?],
+                        "Active Solar":         [?, ?, ?, ?, ?, ?, ?]
                     }
                 }
-
-                Important:
-                - Ensure the JSON structure is strictly adhered to.
-                - Infer ranks based on the data provided without copying values directly.
-                - Use User's context to inform recommendations.
-                - Base decision-making on fuel type suitability and system performance in context.
-                - Validate the JSON format before submission.
             """
         
         # Get conversation history
@@ -579,19 +581,13 @@ async def generate_recommendation(state: GraphState) -> GraphState:
         full_response = await system_components.llm.ainvoke(messages)
         response_content = full_response.content if hasattr(full_response, 'content') else str(full_response)
         logger.info(f"LLM Response: {response_content}...")
-        # Extract JSON from response with better error handling
+
         try:
-            # First try to find JSON in the response
-            json_match = re.search(r'\{(?:[^{}]|(?R))*\}', response_content)
-            if not json_match:
-                raise ValueError("No JSON found in response")
-            
-            # Parse the JSON with strict validation
-            chart_data = json.loads(json_match.group(0))
-
-            if not all(key in chart_data for key in ["categories", "heaters"]):
-                raise ValueError("Invalid JSON structure")
-
+            start = response_content.find('{')
+            end = response_content.rfind('}')
+            if start != -1 and end != -1 and end > start:
+                json_text = response_content[start:end+1]
+                chart_data = json.loads(json_text)
                 
         except (json.JSONDecodeError, ValueError) as e:
             logger.error(f"Failed to parse JSON response: {e}")
@@ -747,7 +743,7 @@ def has_sufficient_info(messages: List[BaseMessage]) -> bool:
             covered_categories += 1
     
     # Need at least 5 out of 7 categories covered
-    return covered_categories >= 5
+    return covered_categories >= 6
 
 def is_conversation_complete(response: str) -> bool:
     """Check if the conversation has reached the recommendation stage"""
@@ -919,7 +915,7 @@ class WaterHeaterGraphInterface:
             state = get_conversation_state(session_id)
             # Add the new user message
             state["messages"].append(HumanMessage(content=user_message))
-            state["turn_count"] = state.get("turn_count", 0) + 1
+            # state["turn_count"] = state.get("turn_count", 0) + 1
 
             fallback_sent = False
 
@@ -928,6 +924,11 @@ class WaterHeaterGraphInterface:
                     if metadata.get("langgraph_node") in ["continue", "rag_query", "recommend"]:
                         yield f"data: {json.dumps({'content': msg.content})}\n\n"
                         fallback_sent = True
+
+            final_state = self.graph.get_state(self.config)
+            if final_state and final_state.values:
+                app_state.conversation_sessions[session_id].update(final_state.values)
+
             if not fallback_sent:
                 yield f"data: {json.dumps({'content': 'I\'m sorry, I couldn\'t generate a meaningful response. Could you rephrase or ask something else?'})}\n\n"
 
@@ -1049,7 +1050,7 @@ async def send_message(
 @app.get("/chat/chart-data")
 async def get_chart_data():
     """Return the recommendation chart data"""
-    state = get_conversation_state()
+    state = get_conversation_state(DEFAULT_SESSION_ID) 
     if not state.get("chart_data"):
         raise HTTPException(status_code=404, detail="Chart data not found")
     

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -35,7 +36,7 @@
         .header h1 {
             font-size: 2.5rem;
             margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
         }
 
         .header p {
@@ -46,7 +47,7 @@
         .chat-container {
             background: white;
             border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,1.2);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 1.2);
             overflow: hidden;
             margin-bottom: 20px;
         }
@@ -71,8 +72,15 @@
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .message.user {
@@ -123,7 +131,8 @@
             border-color: #007bff;
         }
 
-        .send-btn, .start-btn {
+        .send-btn,
+        .start-btn {
             padding: 12px 24px;
             margin-left: 10px;
             background: linear-gradient(45deg, #007bff, #0056b3);
@@ -135,9 +144,10 @@
             transition: all 0.3s;
         }
 
-        .send-btn:hover, .start-btn:hover {
+        .send-btn:hover,
+        .start-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,123,255,0.4);
+            box-shadow: 0 5px 15px rgba(0, 123, 255, 0.4);
         }
 
         .send-btn:disabled {
@@ -151,7 +161,7 @@
             background: white;
             border-radius: 15px;
             padding: 30px;
-            box-shadow: 0 10px 30px rgba(0,0,0,1.2);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 1.2);
             margin-top: 20px;
             display: none;
         }
@@ -162,8 +172,15 @@
         }
 
         @keyframes slideUp {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .chart-title {
@@ -210,9 +227,17 @@
         }
 
         @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.5; }
-            100% { opacity: 1; }
+            0% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+
+            100% {
+                opacity: 1;
+            }
         }
 
         .legend {
@@ -242,56 +267,60 @@
             .container {
                 padding: 10px;
             }
-            
+
             .header h1 {
                 font-size: 2rem;
             }
-            
+
             .message-content {
                 max-width: 85%;
             }
-            
+
             .chart-wrapper {
                 height: 400px;
             }
         }
     </style>
 </head>
+
 <body>
     <div class="container">
-        
-        <div class="chat-container">
-            <div class="chat-header">
-                <div class="header">
-                    <h1>🏠 Water Heater Advisor</h1>
-                </div>
-            </div>
-            
-            <div class="chat-messages" id="chatMessages">
-                <div class="message assistant">
-                    <div class="message-content">
-                        Welcome! I'm here to help you find the perfect water heater for your home. Click "Start Conversation" to begin!
+        <div class="content-wrapper">
+            <div class="chat-container">
+                <div class="chat-header">
+                    <div class="header">
+                        <h1>🏠 Water Heater Advisor</h1>
                     </div>
                 </div>
-                <div class="loading" id="loading">
-                    <span class="status-indicator thinking"></span>AI is thinking...
-                </div>
-            </div>
-            
-            <div class="input-container">
-                <input type="text" id="messageInput" class="message-input" placeholder="Type your message here..." disabled>
-                <button id="sendBtn" class="send-btn" disabled>Send</button>
-                <button id="startBtn" class="start-btn">Start Conversation</button>
-            </div>
-            
-        </div>
 
-        <div class="chart-container" id="chartContainer">
-            <h2 class="chart-title">🏆 Your Personalized Water Heater Recommendations</h2>
-            <div class="chart-wrapper">
-                <canvas id="recommendationChart"></canvas>
+                <div class="chat-messages" id="chatMessages">
+                    <div class="message assistant">
+                        <div class="message-content">
+                            Welcome! I'm here to help you find the perfect water heater for your home. Click "Start
+                            Conversation" to begin!
+                        </div>
+                    </div>
+                    <div class="loading" id="loading">
+                        <span class="status-indicator thinking"></span>AI is thinking...
+                    </div>
+                </div>
+
+                <div class="input-container">
+                    <input type="text" id="messageInput" class="message-input" placeholder="Type your message here..."
+                        disabled>
+                    <button id="sendBtn" class="send-btn" disabled>Send</button>
+                    <button id="startBtn" class="start-btn">Start Conversation</button>
+                </div>
+
             </div>
-            <div class="legend" id="chartLegend"></div>
+
+            <div class="chart-container" id="chartContainer">
+                <h2 class="chart-title">🏆 Your Personalized Water Heater Recommendations</h2>
+                <div class="chart-wrapper">
+                    <canvas id="recommendationChart"></canvas>
+                </div>
+                <div class="legend" id="chartLegend"></div>
+            </div>
         </div>
     </div>
 
@@ -306,7 +335,7 @@
                 this.chartContainer = document.getElementById('chartContainer');
                 this.chart = null;
                 this.isConversationStarted = false;
-                
+
                 this.initializeEventListeners();
             }
 
@@ -320,26 +349,41 @@
                 });
             }
 
+            async checkAndDisplayChartData() {
+                try {
+                    const response = await fetch('/chat/chart-data');
+                    if (response.ok) {
+                        const chartData = await response.json();
+                        this.createChart(chartData);
+                        this.chartContainer.classList.add('show');
+                    }
+                } catch (error) {
+                    // Chart data not available, continue normally
+                    console.log('No chart data available');
+                }
+            }
+
             async startConversation() {
                 try {
                     this.startBtn.disabled = true;
                     this.showLoading();
-                    
+
                     const response = await fetch('/chat/start', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' }
                     });
-                    
+
                     const data = await response.json();
-                    
+
                     this.clearMessages();
+                    this.chartContainer.classList.remove('show');
                     this.addMessage(data.message, 'assistant');
                     this.enableInput();
                     this.isConversationStarted = true;
-                    
+
                     this.startBtn.textContent = 'Restart';
                     this.startBtn.disabled = false;
-                    
+
                 } catch (error) {
                     console.error('Error starting conversation:', error);
                     this.addMessage('Sorry, I encountered an error. Please try again.', 'assistant');
@@ -384,11 +428,11 @@
                                     const data = JSON.parse(line.slice(6));
                                     if (data.content) {
                                         assistantMessage += data.content;
-                                        
+
                                         if (!messageElement) {
                                             messageElement = this.addMessage('', 'assistant');
                                         }
-                                        
+
                                         messageElement.querySelector('.message-content').textContent = assistantMessage;
                                         this.scrollToBottom();
                                     }
@@ -398,7 +442,13 @@
                             }
                         }
                     }
-
+                    // After the streaming loop ends, add this:
+                    if (assistantMessage && this.isJsonResponse(assistantMessage)) {
+                        await this.handleRecommendationResponse(assistantMessage);
+                    } else {
+                        // Check if chart data exists in state and display it
+                        await this.checkAndDisplayChartData();
+                    }
                     // Check if this is a recommendation response (JSON data)
                     if (this.isJsonResponse(assistantMessage)) {
                         await this.handleRecommendationResponse(assistantMessage);
@@ -434,22 +484,17 @@
 
             createChart(data) {
                 const ctx = document.getElementById('recommendationChart').getContext('2d');
-                
+
                 if (this.chart) {
                     this.chart.destroy();
                 }
 
                 const heaterNames = Object.keys(data.heaters);
                 const categories = data.categories;
-                
+
                 // Colors for each heater type (matching your image style)
                 const colors = [
-                    '#FF9F43', // Orange for first heater
-                    '#5D4E75', // Purple for second heater  
-                    '#A8D5A8', // Light green for third heater
-                    '#FF6B6B', // Red for fourth heater
-                    '#4ECDC4', // Teal for fifth heater
-                    '#45B7D1'  // Blue for sixth heater
+                    '#FF9F43', '#5D4E75', '#A8D5A8', '#FF6B6B', '#4ECDC4', '#45B7D1'
                 ];
 
                 // Create datasets - one for each heater type
@@ -459,6 +504,7 @@
                     backgroundColor: colors[index % colors.length],
                     borderColor: colors[index % colors.length],
                     borderWidth: 1,
+                    borderRadius: 3,
                     barThickness: 10
                 }));
 
@@ -489,10 +535,10 @@
                             },
                             tooltip: {
                                 callbacks: {
-                                    title: function(context) {
+                                    title: function (context) {
                                         return context[0].label;
                                     },
-                                    label: function(context) {
+                                    label: function (context) {
                                         return `${context.dataset.label}: ${context.parsed.x}`;
                                     }
                                 }
@@ -538,18 +584,18 @@
             createLegend(data, colors) {
                 const legendContainer = document.getElementById('chartLegend');
                 legendContainer.innerHTML = '';
-                
+
                 Object.keys(data.heaters).forEach((heater, index) => {
                     const legendItem = document.createElement('div');
                     legendItem.className = 'legend-item';
-                    
+
                     const colorBox = document.createElement('div');
                     colorBox.className = 'legend-color';
                     colorBox.style.backgroundColor = colors[index % colors.length];
-                    
+
                     const label = document.createElement('span');
                     label.textContent = heater;
-                    
+
                     legendItem.appendChild(colorBox);
                     legendItem.appendChild(label);
                     legendContainer.appendChild(legendItem);
@@ -559,14 +605,14 @@
             addMessage(content, type) {
                 const messageDiv = document.createElement('div');
                 messageDiv.className = `message ${type}`;
-                
+
                 const messageContent = document.createElement('div');
                 messageContent.className = 'message-content';
                 messageContent.textContent = content;
-                
+
                 messageDiv.appendChild(messageContent);
                 this.chatMessages.appendChild(messageDiv);
-                
+
                 this.scrollToBottom();
                 return messageDiv;
             }
@@ -605,4 +651,5 @@
         });
     </script>
 </body>
+
 </html>
