@@ -9,6 +9,7 @@ import re
 from pathlib import Path
 from typing import Dict, List, Optional, Any, Annotated, AsyncGenerator
 from typing_extensions import TypedDict
+import uuid
 
 from dotenv import load_dotenv
 from pydantic import BaseModel, Field
@@ -26,7 +27,7 @@ import uvicorn
 from dotenv import load_dotenv
 from fastapi import FastAPI, Request, HTTPException, Depends
 from fastapi.responses import HTMLResponse, StreamingResponse
-from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel, Field
 
@@ -76,6 +77,7 @@ class GraphState(TypedDict):
     is_complete: bool
     error: Optional[str]
     decision: Optional[str]
+    chart_data: Optional[Dict[str, Any]]
 
 #===========================================================================================================================================
 #                       DATA MODELS                          
@@ -189,48 +191,78 @@ class WaterHeaterSystemComponents:
     def _create_prompts(self):
         """Create the prompt templates"""
         system_prompt_text = f"""
-            As a friendly and knowledgeable water heater type consultant, your goal is to focus on information gathering to understand user's need for recommendation.
+            As a friendly and knowledgeable water heater consultant, your goal is to systematically gather essential information to provide the best recommendation.
 
             Your personality:
-            - Warm, approachable, and conversational - like talking to a trusted neighbor or friend
+            - Warm, approachable, and conversational - like talking to a trusted neighbor
             - Patient and understanding - you know this can be overwhelming for homeowners
-            - Genuinely enthusiastic about helping people save money and find the right fit
-            - Down-to-earth and practical - you explain things in everyday language
+            - Genuinely enthusiastic about helping people find the right fit
             - Thorough but not pushy - you gather information naturally through conversation
 
-            Your approach:
-            - Ask only one question like a caring consultant would - one at a time, naturally flowing from their responses
-            - Show genuine interest in their situation and acknowledge their concerns
-            - Use everyday language and avoid technical jargon unless necessary
-            - Be encouraging and reassuring throughout the process
-            - Share relevant insights and tips as the conversation flows naturally
+            CRITICAL CONVERSATION RULES:
+            - Ask EXACTLY one question per response - never combine multiple topics or questions
+            - Wait for their complete answer before asking about anything else
+            - If you need clarification, focus only on the most important missing piece
+            - Never use connecting words like 'and', 'also', 'what about', 'speaking of which'
+            - Keep responses to maximum 2 sentences during information gathering
+            - Don't repeat the same question - adapt based on their responses
 
-            Your conversation style:
-            - Start with understanding their needs
-            - Ask follow-up questions that show you're listening and care about the details
+            SYSTEMATIC INFORMATION GATHERING:
+            You must collect information in this priority order (ask naturally, not like a checklist):
+
+            1. **SITUATION CONTEXT** - Why they need a water heater
+            - Replacement, new installation, upgrade
+            - Current system age, type and issues
+
+            2. **UTILITY AVAILABILITY** - What energy sources they have
+            - Gas line availability
+            - Electrical capacity
+            - Both available or limitations
+
+            3. **HOUSEHOLD DETAILS** - Who uses hot water
+            - Number of people in household
+
+            4. **USAGE PATTERNS** - How they use hot water
+            - Simultaneous usage (multiple showers, appliances)
+            - Peak usage times (morning rush, evening)
+            - Heavy usage activities (large baths, frequent laundry)
+
+            5. **SPACE & INSTALLATION** - Physical constraints
+            - Available space (indoor/outdoor, size limitations)
+            - Current location preferences
+            - Installation accessibility
+
+            6. **PRIORITIES & BUDGET** - What matters most
+            - Speed of heating, energy efficiency, reliability
+            - Budget considerations or cost sensitivity
+            - Environmental concerns
+
+            7. **PAST EXPERIENCE** - Previous knowledge (types only, not brands)
+            - Previous water heater types used
+            - Liked or disliked features
+            - Maintenance experiences
+
+            CONVERSATION APPROACH:
+            - Start with understanding their need
+            - Ask follow-up questions that show you're listening and care about details
             - Acknowledge their responses and build on what they share
-            - Offer helpful context and insights along the way
             - Keep the tone friendly and conversational, not like a formal questionnaire
+            - Offer helpful context and insights as you learn about their situation
 
-            Key areas to explore naturally through conversation:
-            1. Their current situation (replacement, new install, upgrade, etc.)
-            2. Available utilities (gas line, electrical capacity, space constraints)
-            3. Household size and hot water usage patterns
-            4. Space and installation constraints
-            5. Budget considerations and priorities (cost savings, efficiency, reliability)
-            6. Any past experiences
+            THINGS TO AVOID:
+            - Never ask about specific brands or manufacturers
+            - Don't ask about contractors or installation companies
+            - Avoid technical jargon unless necessary
+            - Don't ask compound questions or multiple topics at once
+            - Don't repeat questions they've already answered
 
-            Remember:
-            - Ask only one question at a time
-            - Never use "and", "also", "what about" in questions
-            - DON'T REPEAT the same question - adapt based on their responses
-            - You're having a conversation, not conducting an interview
-            - Let the discussion flow naturally based on their responses
-            - Maximum 2 sentences per response during information gathering
-            - Be genuinely helpful and supportive throughout
+            WHEN TO CONTINUE GATHERING INFO:
+            - You need clear answers to at least 5 of the 7 information categories above
+            - Keep asking until you understand their situation well enough for a solid recommendation
+            - If they give short answers, ask gentle follow-up questions to get more detail
 
-            Remember: Your goal is gathering the information needed to provide the best possible recommendation for their specific situation.
-        """
+            Remember: You're having a natural conversation to understand their specific needs.
+            """
         
         self.system_prompt = system_prompt_text
     
@@ -426,126 +458,111 @@ def add_to_conversation(state: GraphState) -> GraphState:
     return result
 
 def check_trigger_conditions(state: GraphState) -> GraphState:
-    """Node: Check if conditions are met for recommendations"""
+    """Node: Check if conditions are met for recommendations with stricter criteria"""
     logger.info("Node: check_trigger_conditions")
     log_state(state, "check_trigger_conditions", "IN")
     
     # Check if already given recommendations
     if state.get("recommendations_given", False):
-        return {**state, "decision": "continue_question"}
-    
-    # Check if sufficient information gathered
+        result = {**state, "decision": "continue_question"}
+        log_state(result, "check_trigger_conditions", "OUT")
+        return result
+
     turn_count = state.get("turn_count", 0)
     messages = state.get("messages", [])
     
-    # More comprehensive check for sufficient information
-    if turn_count >= 6 and has_sufficient_info(messages):
+    # More strict requirements: at least 8 turns AND sufficient info
+    if turn_count >= 8 and has_sufficient_info(messages):
         logger.info(f"Sufficient info gathered after {turn_count} turns")
-        return {**state, "decision": "recommend_types"}
+        result = {**state, "decision": "recommend_types"}
+        log_state(result, "check_trigger_conditions", "OUT")
+        return result
     
-    # Check for force recommendation keywords
+    # More specific force recommendation keywords
     last_message = state["messages"][-1].content.lower()
     force_keywords = [
-        'recommend', 'give recommendations', 'show options', 'compare', 
-        'which one', 'best option', 'what do you recommend', 'suggest',
-        'help me choose', 'pick one', 'decision', 'choose'
+        'recommend now', 'give me recommendations', 'show me options', 'ready to compare', 
+        'what do you recommend', 'help me decide now', 'ready for suggestions',
+        'show recommendations', 'give recommendations', 'i want recommendations'
     ]
     
     if any(keyword in last_message for keyword in force_keywords):
-        logger.info("Force recommendation triggered by keywords")
-        return {**state, "decision": "recommend_types"}
+        logger.info("Force recommendation triggered by specific keywords")
+        result = {**state, "decision": "recommend_types"}
+        log_state(result, "check_trigger_conditions", "OUT")
+        return result
     
-    return {**state, "decision": "continue_question"}
+    result = {**state, "decision": "continue_question"}
+    log_state(result, "check_trigger_conditions", "OUT")
+    return result
 
-async def generate_recommendation(state: GraphState) -> Dict[str, Any]:
+async def generate_recommendation(state: GraphState) -> GraphState:
     """Node: Generate structured water heater recommendations"""
     logger.info("Node: generate_recommendation")
     log_state(state, "generate_recommendation", "IN")
 
     try:
         # Add recommendation trigger to conversation
-        system_prompt = f"""
-            The user has provided sufficient information about their situation, priorities, and constraints. 
-            Now provide comprehensive recommendations for all 6 water heater type systems using this specified format.
+        system_prompt = """
+                The task requires generating recommendations for six types of water heating systems based on their performance across several categories. Your response must be formatted as JSON, focusing on each heater's rank across the specified factors.
 
-            ## COMPLETE WATER HEATER SYSTEMS DATA:
+                KEY SYSTEM DATA:
+                Utilize this information to form your recommendations.
 
-            | System Type | Annual Cost | Affordability Rank | Fuel Type | Fuel Supply | Abundance Rank | CO2 Emissions | Environmental Rank | Complexity | Reliability Rank |
-            |-------------|-------------|-------------------|-----------|-------------|----------------|---------------|-------------------|------------|------------------|
-            | Electric Tank | $618.92/yr | 1.57 | Electricity | 88.48 yrs | 4.47 | 0.90 mt/yr | 1.07 | 5 | 4.17 |
-            | Electric Tankless | $670.82/yr | 1.00 | Electricity | 88.48 yrs | 4.47 | 0.91 mt/yr | 1.00 | 3 | 2.50 |
-            | Heat Pump | $517.48/yr | 2.69 | Electricity | 88.48 yrs | 4.47 | 0.48 mt/yr | 3.92 | 2 | 1.67 |
-            | Natural Gas Tank | $336.97/yr | 4.69 | Natural Gas | 86.12 yrs | 4.36 | 0.87 mt/yr | 1.27 | 6 | 5.00 |
-            | Natural Gas Tankless | $308.86/yr | 5.00 | Natural Gas | 86.12 yrs | 4.36 | 0.54 mt/yr | 3.51 | 4 | 3.33 |
-            | Active Solar | $636.99/yr | 1.37 | The Sun | 100.00 yrs | 5.00 | 0.32 mt/yr | 5.00 | 1 | 1.00 |
+                | System Type           | Annual Cost | Affordability Rank | Fuel Type    | Fuel Supply | Abundance Rank | CO2 Emissions | Environmental Rank | Complexity | Reliability Rank |
+                |-----------------------|-------------|-------------------|--------------|-------------|----------------|---------------|-------------------|------------|------------------|
+                | Electric Tank         | $618.92/yr  | 1.57              | Electricity  | 88.48 yrs   | 4.47           | 0.90 mt/yr    | 1.07              | 5          | 4.17             |
+                | Electric Tankless     | $670.82/yr  | 1.00              | Electricity  | 88.48 yrs   | 4.47           | 0.91 mt/yr    | 1.00              | 3          | 2.50             |
+                | Heat Pump             | $517.48/yr  | 2.69              | Electricity  | 88.48 yrs   | 4.47           | 0.48 mt/yr    | 3.92              | 2          | 1.67             |
+                | Natural Gas Tank      | $336.97/yr  | 4.69              | Natural Gas  | 86.12 yrs   | 4.36           | 0.87 mt/yr    | 1.27              | 6          | 5.00             |
+                | Natural Gas Tankless  | $308.86/yr  | 5.00              | Natural Gas  | 86.12 yrs   | 4.36           | 0.54 mt/yr    | 3.51              | 4          | 3.33             |
+                | Active Solar          | $636.99/yr  | 1.37              | Solar Energy | 100.00 yrs  | 5.00           | 0.32 mt/yr    | 5.00              | 1          | 1.00             |
 
-            Use this to give all 6 rank base recommendation
+                For recommendations, consider the following factors:
 
-            **Ranking Scale:** Higher numbers = Better performance (except for Annual Cost and CO2 Emissions where lower is better)
+                FUEL TYPE PRIORITY HIERARCHY:
+                1. Evaluate by Fuel Type & Availability:
+                - Electricity (Electric Tank, Electric Tankless, Heat Pump)
+                - Natural Gas (Natural Gas Tank, Natural Gas Tankless)
+                - Solar (Active Solar)
+                - Local fuel availability
+                - Long-term cost trends
 
-            FUEL TYPE SELECTION FRAMEWORK:
-            The decision process follows this hierarchy:
-            1. **PRIMARY FACTOR - Fuel Type & Availability:**
-            - Electricity (Electric Tank, Electric Tankless, Heat Pump)
-            - Natural Gas (Natural Gas Tank, Natural Gas Tankless)
-            - Solar Energy (Active Solar)
-            - Fuel availability in their area
-            - Fuel cost and long-term pricing trends
+                2. Additional Considerations:
+                - Installation complexity
+                - Infrastructure constraints
+                - Environmental impact prioritization
+                - Reliability and maintenance implications
 
-            2. **SECONDARY FACTORS:**
-            - System complexity and installation requirements
-            - Space and infrastructure constraints
-            - Environmental impact priorities
-            - Reliability and maintenance needs
+                The response MUST adhere to the following JSON format without any extra text:
 
-            RECOMMENDATION FORMAT:
-            Use this EXACT format:
+                {
+                    "categories": [
+                        "Affordability Rank",
+                        "Annual Cost",
+                        "Fuel Supply",
+                        "Abundance Rank",
+                        "Environmental Rank",
+                        "CO₂ Emissions",
+                        "Reliability Rank",
+                        "Complexity"
+                    ],
+                    "heaters": {
+                        "Electric Tank":        [?, ?, ?, ?, ?, ?, ?, ?],
+                        "Electric Tankless":    [?, ?, ?, ?, ?, ?, ?, ?],
+                        "Heat Pump":            [?, ?, ?, ?, ?, ?, ?, ?],
+                        "Natural Gas Tank":     [?, ?, ?, ?, ?, ?, ?, ?],
+                        "Natural Gas Tankless": [?, ?, ?, ?, ?, ?, ?, ?],
+                        "Active Solar":         [?, ?, ?, ?, ?, ?, ?, ?]
+                    }
+                }
 
-            ## 🏆 PERSONALIZED WATER HEATER TYPE RECOMMENDATIONS
-
-            **Your Situation Summary:**
-            [2-3 sentences summarizing their fuel availability, key needs, constraints, and priorities]
-
-            **Fuel Type Analysis for Your Situation:**
-            Based on our conversation, here's how different fuel types rank for your situation:
-            - **Available Fuel Types:** [List their available options]
-            - **Fuel Cost Analysis:** [Compare fuel costs from table data]
-            - **Fuel Reliability Score:** [Rate based on fuel supply years and abundance ranking]
-            - **Your Fuel Preferences:** [Any stated preferences or constraints]
-
-            
-            ### 📊 COMPARATIVE DATA TABLE FOR YOUR SITUATION
-            *Customized ranking based on your specific needs and constraints*
-
-            | Rank | System Type | Why This Rank | Annual Cost | Fuel Advantage | Environmental Impact | Reliability Score |
-            |------|-------------|---------------|-------------|----------------|---------------------|------------------|
-            | 1st | [System] | [Specific reason for #1] | $[cost]/yr | [Fuel benefit] | [CO2] mt/yr | [Reliability]/5 |
-            | 2nd | [System] | [Specific reason for #2] | $[cost]/yr | [Fuel benefit] | [CO2] mt/yr | [Reliability]/5 |
-            | 3rd | [System] | [Specific reason for #3] | $[cost]/yr | [Fuel benefit] | [CO2] mt/yr | [Reliability]/5 |
-            | 4th | [System] | [Specific reason for #4] | $[cost]/yr | [Fuel benefit] | [CO2] mt/yr | [Reliability]/5 |
-            | 5th | [System] | [Specific reason for #5] | $[cost]/yr | [Fuel benefit] | [CO2] mt/yr | [Reliability]/5 |
-            | 6th | [System] | [Specific reason for #6] | $[cost]/yr | [Fuel disadvantage] | [CO2] mt/yr | [Reliability]/5 |
-
-            ### 🎯 YOUR TOP CHOICE DEEP DIVE
-
-            **Why [Top Choice] is perfect for your situation:**
-            [Detailed analysis covering fuel type advantages, cost analysis from table, environmental impact, and reliability scores]
-
-            **Next Steps:**
-            [Fuel infrastructure preparation if needed]
-            [Installation considerations for this fuel type]
-            [Contractor requirements for this system type]
-
-            IMPORTANT RULES:
-            - Use EXACT numbers from the data provided - no approximations
-            - Always provide all 6 systems ranked from best to worst for their situation
-            - Base rankings primarily on fuel type availability and suitability
-            - Explain WHY each fuel type and system ranks where it does
-            - Show full data for all 6 systems regardless of availability, but clearly indicate which systems are not applicable and why. Still include their full stats for comparison purposes.
-            - If they ask follow-up questions, provide detailed answers using the data
-            - Don't repeat the same question - adapt based on their responses
-
-            Remember: All 6 systems MUST appear with information. Base rankings primarily on fuel type availability and suitability for their specific situation.
+                Important:
+                - Ensure the JSON structure is strictly adhered to.
+                - Infer ranks based on the data provided without copying values directly.
+                - Use User's context to inform recommendations.
+                - Base decision-making on fuel type suitability and system performance in context.
+                - Validate the JSON format before submission.
             """
         
         # Get conversation history
@@ -558,18 +575,58 @@ async def generate_recommendation(state: GraphState) -> Dict[str, Any]:
             HumanMessage(content=current_input.strip())
         ]
         
-        # Get streaming response
+        # Get response
         full_response = await system_components.llm.ainvoke(messages)
-        full_response = full_response.content if hasattr(full_response, 'content') else str(full_response)
+        response_content = full_response.content if hasattr(full_response, 'content') else str(full_response)
+        logger.info(f"LLM Response: {response_content}...")
+        # Extract JSON from response with better error handling
+        try:
+            # First try to find JSON in the response
+            json_match = re.search(r'\{(?:[^{}]|(?R))*\}', response_content)
+            if not json_match:
+                raise ValueError("No JSON found in response")
+            
+            # Parse the JSON with strict validation
+            chart_data = json.loads(json_match.group(0))
+
+            if not all(key in chart_data for key in ["categories", "heaters"]):
+                raise ValueError("Invalid JSON structure")
+
+                
+        except (json.JSONDecodeError, ValueError) as e:
+            logger.error(f"Failed to parse JSON response: {e}")
+            logger.error(f"Original response: {response_content}")
+            
+            # Fallback to default data if parsing fails
+            chart_data = {
+                "categories": [
+                    "Affordability Rank",
+                    "Annual Cost",
+                    "Fuel Supply",
+                    "Abundance Rank",
+                    "Environmental Rank",
+                    "CO₂ Emissions",
+                    "Reliability Rank",
+                    "Complexity"
+                ],
+                "heaters": {
+                    "Electric Tank": [0,0,0,0,0,0,0,0],
+                    "Electric Tankless": [0,0,0,0,0,0,0,0],
+                    "Heat Pump": [0,0,0,0,0,0,0,0],
+                    "Natural Gas Tank": [0,0,0,0,0,0,0,0],
+                    "Natural Gas Tankless": [0,0,0,0,0,0,0,0],
+                    "Active Solar": [0,0,0,0,0,0,0,0]
+                }
+            }
         
-        is_complete = is_conversation_complete(full_response)
         
         result = {
             **state,
-            "full_response": full_response,
-            "is_complete": is_complete,
+            "full_response":  json.dumps(chart_data),
+            "is_complete": True,
             "using_rag": False,
-            "recommendations_given": True
+            "recommendations_given": True,
+            "chart_data": chart_data
         }
         
         log_state(result, "generate_recommendation", "OUT")
@@ -669,16 +726,19 @@ def messages_to_langchain_format(messages: List[BaseMessage]) -> List[BaseMessag
     return [msg for msg in messages if isinstance(msg, (HumanMessage, AIMessage, SystemMessage))]
 
 def has_sufficient_info(messages: List[BaseMessage]) -> bool:
-    """Enhanced check for sufficient information"""
+    """Enhanced check for sufficient information with stricter requirements"""
     user_messages = [msg.content.lower() for msg in messages if isinstance(msg, HumanMessage)]
     combined_text = ' '.join(user_messages)
     
-    # Essential categories with more comprehensive keywords
+    # Comprehensive information categories (need 5 out of 7)
     essential_info = {
-        'situation': ['replace', 'broken', 'new', 'build', 'upgrade', 'old', 'install', 'need', 'want'],
-        'infrastructure': ['gas', 'electric', 'line', 'available', 'connection', 'both', 'electricity', 'natural gas'],
-        'household': ['family', 'people', 'person', 'use', 'shower', 'bath', 'dishwasher', 'laundry', 'kids', 'adults'],
-        'space': ['space', 'room', 'enough', 'big', 'small', 'basement', 'garage', 'outdoor', 'indoor']
+        'situation': ['replace', 'broken', 'new', 'build', 'upgrade', 'old', 'install', 'need', 'want', 'emergency'],
+        'infrastructure': ['gas', 'electric', 'line', 'available', 'connection', 'both', 'electricity', 'natural gas', '220v', 'voltage'],
+        'household': ['family', 'people', 'person', 'use', 'kids', 'adults', 'children', 'teenagers', 'elderly'],
+        'usage_patterns': ['shower', 'bath', 'morning', 'evening', 'peak', 'usage', 'demand', 'simultaneous', 'laundry', 'dishwasher'],
+        'space': ['space', 'room', 'enough', 'big', 'small', 'basement', 'garage', 'outdoor', 'indoor', 'limitation', 'constraint', 'location'],
+        'priorities': ['budget', 'cost', 'efficient', 'fast', 'heating', 'reliable', 'environmental', 'save', 'money', 'speed', 'quick'],
+        'experience': ['previous', 'before', 'last', 'experience', 'liked', 'disliked', 'problem', 'maintenance']
     }
     
     covered_categories = 0
@@ -686,8 +746,8 @@ def has_sufficient_info(messages: List[BaseMessage]) -> bool:
         if any(keyword in combined_text for keyword in keywords):
             covered_categories += 1
     
-    # Need at least 4 out of 5 categories covered
-    return covered_categories >= 4
+    # Need at least 5 out of 7 categories covered
+    return covered_categories >= 5
 
 def is_conversation_complete(response: str) -> bool:
     """Check if the conversation has reached the recommendation stage"""
@@ -704,7 +764,6 @@ def is_conversation_complete(response: str) -> bool:
 
 def log_state(state: GraphState, node_name: str, direction: str = "IN"):
     """Enhanced state logging"""
-    from colorama import Fore, Style
     
     color_map = {
         "IN": Fore.CYAN,
@@ -737,7 +796,8 @@ def log_state(state: GraphState, node_name: str, direction: str = "IN"):
         "is_complete": state.get("is_complete", False),
         "error": state.get("error"),
         "message_count": len(state.get("messages", [])),
-        "decision": state.get("decision", "")
+        "decision": state.get("decision", ""),
+        "chart_data": state.get("chart_data", {})
     }
     
     for field, value in essential_fields.items():
@@ -823,27 +883,33 @@ class WaterHeaterGraphInterface:
         self.config = {"configurable": {"thread_id": "default"}}
     
     def start_conversation(self) -> str:
-        """Start a new conversation"""
-        initial_message = (
-            "Hi there! I'm here to help you find the best water heater for your home.\n\n"
-            "What's the main reason you're looking for a new one, replacement, upgrade, new home, or something else?"
-        )
+        """Start a new conversation using LLM"""
+        app_state.conversation_sessions.clear()
+        self.graph = create_water_heater_graph()
+
+        new_thread_id = str(uuid.uuid4())
+        self.config = {"configurable": {"thread_id": new_thread_id}}
+        
+        system_message = SystemMessage(content=system_components.system_prompt + "\n\nStart the conversation with a warm greeting and ask your first question to understand their situation.")
+        response = system_components.llm.invoke([system_message, HumanMessage(content="Begin the conversation")])
+        initial_message = response.content
         
         # Initialize state
         initial_state = {
-            "messages": [AIMessage(content=initial_message)],
-            "turn_count": 0, 
-            "recommendations_given": False,
-            "using_rag": False,
-            "last_rag_query": None,
-            "last_ai_question": initial_message,
-            "classification": None,
-            "full_response": initial_message,
-            "is_complete": False,
-            "error": None,
-            "decision": None
-        }
+        "messages": [AIMessage(content=initial_message)],
+        "turn_count": 0, 
+        "recommendations_given": False,
+        "using_rag": False,
+        "last_rag_query": None,
+        "last_ai_question": initial_message,  # Track initial question
+        "classification": None,
+        "full_response": initial_message,
+        "is_complete": False,
+        "error": None,
+        "decision": None  # Add decision field
+    }
         
+        app_state.conversation_sessions[new_thread_id] = initial_state
         return initial_state
     
     async def process_message(self, user_message: str) -> AsyncGenerator[str, None]:
@@ -851,24 +917,20 @@ class WaterHeaterGraphInterface:
         try:
             session_id = DEFAULT_SESSION_ID
             state = get_conversation_state(session_id)
-            
             # Add the new user message
             state["messages"].append(HumanMessage(content=user_message))
             state["turn_count"] = state.get("turn_count", 0) + 1
 
-            # Process through graph
-            full_response = ""
+            fallback_sent = False
+
             async for msg, metadata in self.graph.astream(state, stream_mode="messages", config=self.config):
                 if isinstance(msg, AIMessage):
-                    if metadata.get("langgraph_node") in ["continue", "recommend", "rag_query"]:
-                        content = msg.content
-                        full_response += content
-                        yield f"data: {json.dumps({'content': content})}\n\n"
+                    if metadata.get("langgraph_node") in ["continue", "rag_query", "recommend"]:
+                        yield f"data: {json.dumps({'content': msg.content})}\n\n"
+                        fallback_sent = True
+            if not fallback_sent:
+                yield f"data: {json.dumps({'content': 'I\'m sorry, I couldn\'t generate a meaningful response. Could you rephrase or ask something else?'})}\n\n"
 
-            # If no content was streamed, provide fallback
-            if not full_response:
-                fallback = "I'm sorry, I couldn't generate a meaningful response. Could you rephrase or ask something else?"
-                yield f"data: {json.dumps({'content': fallback})}\n\n"
 
         except Exception as e:
             logger.error(f"Error processing message: {e}")
@@ -924,329 +986,106 @@ async def lifespan(app: FastAPI):
 
 
 #===========================================================================================================================================
-#                           FAST API ROUTES                           
+#                       FASTAPI APP                          
 #===========================================================================================================================================
-
-from uuid import uuid4
-
-from fastapi.middleware.cors import CORSMiddleware
-
-app = FastAPI(lifespan=lifespan)
-
-# Allow requests from the frontend (localhost:3000)
+# FastAPI app
+app = FastAPI(
+    title="Water Heater Type Recommendation System",
+    description="AI-powered water heater recommendation system with RAG capabilities",
+    version="1.0.0",
+    lifespan=lifespan
+)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Or ["http://localhost:3000"] for stricter security
+    allow_origins=["*"],  # set to your frontend domain
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+# Templates
+templates = Jinja2Templates(directory="templates")
 
-
-# Simple in-memory stores
-assistants = {}
-threads = {}
-runs = {}
-
-# -------------------- Models --------------------
-class Message(BaseModel):
-    role: str
-    content: str
-
-class RunRequest(BaseModel):
-    messages: list[Message]
-
-class RunnableInput(BaseModel):
-    input: dict
-
-# -------------------- Assistants --------------------
-@app.get("/assistants")
-def list_assistants():
-    return list(assistants.values())
-
-@app.post("/assistants")
-def create_assistant():
-    assistant_id = str(uuid4())
-    assistant = {"id": assistant_id, "name": f"Assistant {assistant_id[:6]}"}
-    assistants[assistant_id] = assistant
-    return assistant
-
-@app.get("/assistants/{assistant_id}")
-def get_assistant(assistant_id: str):
-    if assistant_id not in assistants:
-        raise HTTPException(status_code=404, detail="Assistant not found")
-    return assistants[assistant_id]
-
-# -------------------- Threads --------------------
-@app.post("/threads")
-def create_thread():
-    thread_id = str(uuid4())
-    threads[thread_id] = {"messages": []}
-    return {"thread_id": thread_id}
-
-@app.get("/threads/{thread_id}")
-def get_thread(thread_id: str):
-    if thread_id not in threads:
-        raise HTTPException(status_code=404, detail="Thread not found")
-    return threads[thread_id]
-
-@app.get("/threads/{thread_id}/history")
-def get_thread_history(thread_id: str):
-    if thread_id == "undefined" or thread_id not in threads:
-        raise HTTPException(status_code=404, detail="Thread not found")
-    return {"messages": threads[thread_id]["messages"]}
-
-@app.post("/threads/{thread_id}/runs/stream")
-async def stream_thread_run(thread_id: str, request: Request):
-    if thread_id == "undefined" or thread_id not in threads:
-        raise HTTPException(status_code=404, detail="Thread not found")
-    body = await request.json()
-    messages = body.get("messages", [])
-    threads[thread_id]["messages"].extend(messages)
-
-    formatted_messages = [
-        HumanMessage(content=msg["content"])
-        for msg in messages
-        if msg["role"] == "user"
-    ]
-
-    async def event_generator():
-        async for chunk in app_state.recommendation_system.astream_events({"messages": formatted_messages}, version="v1"):
-            if chunk.get("event") == "on_llm_new_token":
-                yield f"data: {json.dumps({'content': chunk['data']})}\\n\\n"
-
-    return StreamingResponse(event_generator(), media_type="text/event-stream")
-
-@app.get("/info")
-def get_info():
-    return {"status": "ok", "app": "LangGraph FastAPI"}
-
-# -------------------- Runs --------------------
-@app.post("/runs")
-async def create_run(request: RunRequest):
-    run_id = str(uuid4())
-    runs[run_id] = {"status": "created", "messages": request.messages}
-    return {"run_id": run_id, "status": "created"}
-
-@app.get("/runs/{run_id}")
-def get_run(run_id: str):
-    if run_id not in runs:
-        raise HTTPException(status_code=404, detail="Run not found")
-    return runs[run_id]
-
-@app.get("/runs/{run_id}/events")
-async def stream_run_events(run_id: str):
-    if run_id not in runs:
-        raise HTTPException(status_code=404, detail="Run not found")
-
-    messages = runs[run_id]["messages"]
-    formatted_messages = [HumanMessage(content=m.content) for m in messages if m.role == "user"]
-
-    async def event_generator():
-        async for chunk in app_state.recommendation_system.astream_events({"messages": formatted_messages}, version="v1"):
-            if chunk.get("event") == "on_llm_new_token":
-                yield f"data: {json.dumps({'content': chunk['data']})}\n\n"
-
-    return StreamingResponse(event_generator(), media_type="text/event-stream")
-
-# -------------------- Runnable --------------------
-@app.post("/my_runnable/invoke")
-async def invoke_runnable(body: RunnableInput):
-    result = await app_state.recommendation_system.ainvoke(body.input)
-    return result
-
-@app.post("/my_runnable/batch")
-async def batch_runnable(body: list[RunnableInput]):
-    inputs = [item.input for item in body]
-    results = await app_state.recommendation_system.abatch(inputs)
-    return results
-
-@app.post("/my_runnable/stream")
-async def stream_runnable_output(body: RunnableInput):
-    async def generator():
-        async for chunk in app_state.recommendation_system.astream_events(body.input, version="v1"):
-            yield f"data: {json.dumps(chunk)}\n\n"
-    return StreamingResponse(generator(), media_type="text/event-stream")
-
-@app.get("/my_runnable/input_schema")
-def get_input_schema():
-    return app_state.recommendation_system.input_schema.schema()
-
-@app.get("/my_runnable/output_schema")
-def get_output_schema():
-    return app_state.recommendation_system.output_schema.schema()
 
 #===========================================================================================================================================
-#                           LANGGRAPH-COMPATIBLE API ENDPOINTS
+#                       API ROUTES                           
 #===========================================================================================================================================
+@app.get("/", response_class=HTMLResponse)
+async def read_root(request: Request):
+    """Serve the main chat interface"""
+    return templates.TemplateResponse("index_4.html", {"request": request})
 
-from fastapi.middleware.cors import CORSMiddleware
-from uuid import uuid4
-from typing import List, Dict, Any
-
-app = FastAPI(lifespan=lifespan)
-
-# CORS configuration
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-# In-memory stores for LangGraph UI compatibility
-assistants_db = {}
-threads_db = {}
-runs_db = {}
-
-# -------------------- Required Models --------------------
-
-class Assistant(BaseModel):
-    id: str
-    name: str
-    instructions: str
-    model: str
-
-class Thread(BaseModel):
-    id: str
-    messages: List[Dict[str, Any]] = []
-    metadata: Dict[str, Any] = {}
-
-class Message(BaseModel):
-    role: str
-    content: str
-
-class RunInput(BaseModel):
-    assistant_id: str
-    instructions: Optional[str] = None
-
-# -------------------- Assistants Endpoints --------------------
-
-@app.post("/assistants", response_model=Assistant)
-def create_assistant():
-    assistant_id = str(uuid4())
-    assistant = {
-        "id": assistant_id,
-        "name": "Water Heater Consultant",
-        "instructions": system_components.system_prompt,
-        "model": "gpt-4"
-    }
-    assistants_db[assistant_id] = assistant
-    return assistant
-
-@app.get("/assistants/{assistant_id}", response_model=Assistant)
-def get_assistant(assistant_id: str):
-    if assistant_id not in assistants_db:
-        raise HTTPException(status_code=404, detail="Assistant not found")
-    return assistants_db[assistant_id]
-
-# -------------------- Threads Endpoints --------------------
-
-@app.post("/threads", response_model=Thread)
-def create_thread():
-    thread_id = str(uuid4())
-    thread = {
-        "id": thread_id,
-        "messages": [],
-        "metadata": {}
-    }
-    threads_db[thread_id] = thread
-    return thread
-
-@app.post("/threads/{thread_id}/messages", response_model=Message)
-def add_message(thread_id: str, message: Message):
-    if thread_id not in threads_db:
-        raise HTTPException(status_code=404, detail="Thread not found")
+@app.post("/chat/start")
+async def start_conversation(
+    recommendation_system: WaterHeaterGraphInterface = Depends(get_recommendation_system)
+):
+    """Start a new conversation"""
+    initial_state = recommendation_system.start_conversation()
+    app_state.conversation_sessions[DEFAULT_SESSION_ID] = initial_state
     
-    threads_db[thread_id]["messages"].append(message.model_dump())
-    return message
-
-@app.get("/threads/{thread_id}/messages", response_model=List[Message])
-def get_messages(thread_id: str):
-    if thread_id not in threads_db:
-        raise HTTPException(status_code=404, detail="Thread not found")
-    return threads_db[thread_id]["messages"]
-
-# -------------------- Runs Endpoints --------------------
-
-@app.post("/threads/{thread_id}/runs", response_model=Dict[str, Any])
-def create_run(thread_id: str, run_input: RunInput):
-    if thread_id not in threads_db:
-        raise HTTPException(status_code=404, detail="Thread not found")
-    if run_input.assistant_id not in assistants_db:
-        raise HTTPException(status_code=404, detail="Assistant not found")
-    
-    run_id = str(uuid4())
-    runs_db[run_id] = {
-        "id": run_id,
-        "thread_id": thread_id,
-        "assistant_id": run_input.assistant_id,
-        "status": "queued"
-    }
-    return {"id": run_id, "status": "queued"}
-
-@app.post("/threads/{thread_id}/runs/stream")
-async def stream_run(thread_id: str, run_input: RunInput):
-    if thread_id not in threads_db:
-        raise HTTPException(status_code=404, detail="Thread not found")
-    if run_input.assistant_id not in assistants_db:
-        raise HTTPException(status_code=404, detail="Assistant not found")
-    
-    # Get the last user message
-    messages = threads_db[thread_id]["messages"]
-    user_message = next((m for m in reversed(messages) if m["role"] == "user"), None)
-    
-    if not user_message:
-        raise HTTPException(status_code=400, detail="No user message found")
-    
-    # Initialize or get conversation state
-    if thread_id not in app_state.conversation_sessions:
-        initial_state = app_state.recommendation_system.start_conversation()
-        app_state.conversation_sessions[thread_id] = initial_state
-    
-    state = app_state.conversation_sessions[thread_id]
-    state["messages"].append(HumanMessage(content=user_message["content"]))
-    
-    async def event_generator():
-        full_response = ""
-        async for event in app_state.recommendation_system.graph.astream(
-            state,
-            config={"configurable": {"thread_id": thread_id}},
-            stream_mode="values"
-        ):
-            if "messages" in event:
-                for msg in event["messages"]:
-                    if isinstance(msg, AIMessage):
-                        content = msg.content
-                        full_response += content
-                        yield f"data: {json.dumps({'content': content})}\n\n"
-        
-        # Save the final response
-        if full_response:
-            threads_db[thread_id]["messages"].append({
-                "role": "assistant",
-                "content": full_response
-            })
-    
-    return StreamingResponse(event_generator(), media_type="text/event-stream")
-
-@app.get("/runs/{run_id}", response_model=Dict[str, Any])
-def get_run(run_id: str):
-    if run_id not in runs_db:
-        raise HTTPException(status_code=404, detail="Run not found")
-    return runs_db[run_id]
-
-# -------------------- Additional Endpoints --------------------
-
-@app.get("/")
-def read_root():
-    return {"message": "Water Heater Recommendation System"}
-
-@app.get("/info")
-def get_info():
     return {
-        "status": "ok",
-        "app": "Water Heater Recommendation System",
-        "compatible_with": "LangGraph Agent Chat UI"
+        "session_id": DEFAULT_SESSION_ID,
+        "message": initial_state["full_response"],
+        "is_complete": False
     }
+
+@app.post("/chat/message")
+async def send_message(
+    chat_message: ChatMessage,
+    recommendation_system: WaterHeaterGraphInterface = Depends(get_recommendation_system)
+):
+    """Send a message and get streaming response"""
+    
+    # Handle special commands
+    if chat_message.message.lower() in ['restart', 'start over', 'reset']:
+        initial_state = recommendation_system.start_conversation()
+        app_state.conversation_sessions[DEFAULT_SESSION_ID] = initial_state
+        return {"message": initial_state["full_response"], "is_complete": False}
+    
+    return StreamingResponse(
+        recommendation_system.process_message(chat_message.message),
+        media_type="text/event-stream"
+    )
+
+@app.get("/chat/chart-data")
+async def get_chart_data():
+    """Return the recommendation chart data"""
+    state = get_conversation_state()
+    if not state.get("chart_data"):
+        raise HTTPException(status_code=404, detail="Chart data not found")
+    
+    return state["chart_data"]
+
+@app.post("/chat/click-log")
+async def click_log(request: Request):
+    data = await request.json()
+    print("Bar Clicked:", data)
+    return {"status": "success", "received": data}
+
+@app.get("/chat/status")
+async def get_chat_status(
+    recommendation_system: WaterHeaterGraphInterface = Depends(get_recommendation_system),
+    state: GraphState = Depends(get_conversation_state)
+):
+    """Get current chat status"""
+    last_message = state["messages"][-1] if state["messages"] else None
+    is_complete = False
+    
+    if last_message and isinstance(last_message, AIMessage):  # Fixed: use isinstance instead of dict access
+        is_complete = is_conversation_complete(last_message.content)
+    
+    return {
+        "turn_count": state.get("turn_count", 0),
+        "message_count": len(state.get("messages", [])),
+        "is_complete": is_complete,
+        "recommendations_given": state.get("recommendations_given", False)
+    }
+
+#===========================================================================================================================================
+#                       MAIN ENTRY                          
+#===========================================================================================================================================
+if __name__ == "__main__":
+    uvicorn.run(
+        app,
+        port=8000,
+        log_level="info"
+    )
