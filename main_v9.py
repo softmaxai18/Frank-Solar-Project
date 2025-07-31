@@ -92,6 +92,13 @@ class ClassificationResult(BaseModel):
     confidence: float = Field(..., ge=0.0, le=1.0)
     reasoning: str
 
+class JsonData(BaseModel):
+    categories: List[str]
+    heaters: Dict[str, List[float]] = Field(
+        ...,
+        description="A dictionary mapping heater types to their scores across various categories."
+    )
+
 #===========================================================================================================================================
 #                       APPLICATION STATE                    
 #===========================================================================================================================================
@@ -513,85 +520,83 @@ async def generate_recommendation(state: GraphState) -> GraphState:
 
     try:
         # Add recommendation trigger to conversation
+        # Get conversation history
+        conversation_context = state["messages"]
+        user_message = state["messages"][-1].content
+        
         system_prompt = """
-                The user has provided sufficient information about their situation, priorities, and constraints. 
-                Now provide comprehensive recommendations in JSON for all 6 water heater type systems.
+                You are a water heater recommendation expert. Based on the user's situation, provide comprehensive rankings for all 6 water heater systems using the performance data below.. 
 
-                KEY SYSTEM DATA:
+                PERFORMANCE DATA MATRIX:
                 Utilize this information to form your recommendations.
 
-                | System Type           | Annual Cost | Affordability Rank| Fuel Type    | Fuel Supply | Abundance Rank | CO2 Emissions | Environmental Rank | Complexity | Reliability Rank |
-                |-----------------------|-------------|-------------------|--------------|-------------|----------------|---------------|-------------------|------------|------------------|
-                | Electric Tank         | $618.92/yr  | 1.57              | Electricity  | 88.48 yrs   | 4.47           | 0.90 mt/yr    | 1.07              | 5          | 4.17             |
-                | Electric Tankless     | $670.82/yr  | 1.00              | Electricity  | 88.48 yrs   | 4.47           | 0.91 mt/yr    | 1.00              | 3          | 2.50             |
-                | Heat Pump             | $517.48/yr  | 2.69              | Electricity  | 88.48 yrs   | 4.47           | 0.48 mt/yr    | 3.92              | 2          | 1.67             |
-                | Natural Gas Tank      | $336.97/yr  | 4.69              | Natural Gas  | 86.12 yrs   | 4.36           | 0.87 mt/yr    | 1.27              | 6          | 5.00             |
-                | Natural Gas Tankless  | $308.86/yr  | 5.00              | Natural Gas  | 86.12 yrs   | 4.36           | 0.54 mt/yr    | 3.51              | 4          | 3.33             |
-                | Active Solar          | $636.99/yr  | 1.37              | Solar Energy | 100.00 yrs  | 5.00           | 0.32 mt/yr    | 5.00              | 1          | 1.00             |
+                | System Type          | Affordability ($/yr)  | Affordability Rank | Abundance (Fuel Supply yrs) | Abundance Rank | CO₂ Emissions (mt/yr) | Environmental Rank | Complexity | Reliability Rank |
+                | -------------------- | --------------------- | ------------------ | --------------------------- | -------------- | --------------------- | ------------------ | ------  -- | ---------------- |
+                | Electric Tank        | 618.92                | 1.57               | 88.48                       | 4.47           | 0.90                  | 1.07               | 5          | 4.17             |
+                | Electric Tankless    | 670.82                | 1.00               | 88.48                       | 4.47           | 0.91                  | 1.00               | 3          | 2.50             |
+                | Heat Pump            | 517.48                | 2.69               | 88.48                       | 4.47           | 0.48                  | 3.92               | 2          | 1.67             |
+                | Natural Gas Tank     | 336.97                | 4.69               | 86.12                       | 4.36           | 0.87                  | 1.27               | 6          | 5.00             |
+                | Natural Gas Tankless | 308.86                | 5.00               | 86.12                       | 4.36           | 0.54                  | 3.51               | 4          | 3.33             |
+                | Active Solar         | 636.99                | 1.37               | 100.00                      | 5.00           | 0.32                  | 5.00               | 1          | 1.00             |
 
-                Ranking Scale: Higher numbers = Better performance (except for Annual Cost and CO2 Emissions where lower is better)
-                For recommendations, consider the following factors:
+                RANKING METHODOLOGY:
+                Transform raw data into 1-5 scale rankings where 5 = best performance, 1 = worst performance.
 
-                FUEL TYPE PRIORITY HIERARCHY:
-                1. Evaluate by Fuel Type & Availability:
-                - Electricity (Electric Tank, Electric Tankless, Heat Pump)
-                - Natural Gas (Natural Gas Tank, Natural Gas Tankless)
-                - Solar (Active Solar)
-                - Local fuel availability
-                - Fuel cost and long-term pricing trends
+                1. COST EFFICIENCY RANK: Based on annual operating cost (lower cost = higher rank)
+                - Distribute rankings with clear separation: 1.2, 2.1, 3.4, 4.6, 5.0, 1.8
 
-                2. Additional Considerations:
-                - Installation complexity
-                - Infrastructure constraints
-                - Environmental impact prioritization
-                - Reliability and maintenance implications
+                2. FUEL SECURITY RANK: Based on fuel supply longevity and availability
+                - Distribute rankings with variation: 1.5, 1.3, 4.8, 1.8, 3.7, 5.0  
 
-                Important:
-                - Ensure the JSON structure is strictly adhered to.
-                - Infer ranks based on the data provided without copying values directly.
-                - Use User's context to inform recommendations.
-                - Base decision-making on fuel type suitability and system performance in context.
-                - Validate the JSON format before submission.
-                - Convert all numerical values to appropriate ranks based on the provided data.
-                - Use 1 to 5 ranking scale for all categories, where 1 is worst and 5 is best.
+                3. ENVIRONMENTAL RANK: Based on CO2 emissions (lower emissions = higher rank)
+                - Create distinct separation: 1.4, 1.2, 4.8, 1.6, 3.8, 5.0
 
-                The response MUST adhere to the following JSON format without any extra text:
+                4. RELIABILITY RANK: Based on system complexity and maintenance needs
+                - Inverse of complexity with adjustments: 2.8, 4.2, 4.6, 1.4, 3.5, 5.0
+
+                CRITICAL REQUIREMENTS:
+                - Each heater MUST have unique values across all categories
+                - Use decimal precision (e.g., 1.2, 3.7, 4.8) for better chart visualization
+                - Ensure maximum spread between highest and lowest values in each category
+                - Consider user's priorities when fine-tuning rankings within data constraints
+
+                RESPONSE FORMAT:
+                Return ONLY valid JSON with no additional text:
 
                 {
                     "categories": [
-                        "Affordability Rank",
-                        "Annual Cost",
-                        "Abundance Rank",
-                        "Environmental Rank",
-                        "CO₂ Emissions",
-                        "Reliability Rank",
-                        "Complexity"
+                        "Affordability Ranking",
+                        "Abundance Ranking", 
+                        "Environmental Impact Ranking",
+                        "Reliability Ranking"
                     ],
                     "heaters": {
-                        "Electric Tank":        [?, ?, ?, ?, ?, ?, ?],
-                        "Electric Tankless":    [?, ?, ?, ?, ?, ?, ?],
-                        "Heat Pump":            [?, ?, ?, ?, ?, ?, ?],
-                        "Natural Gas Tank":     [?, ?, ?, ?, ?, ?, ?],
-                        "Natural Gas Tankless": [?, ?, ?, ?, ?, ?, ?],
-                        "Active Solar":         [?, ?, ?, ?, ?, ?, ?]
+                        "Electric Tank":        [?, ?, ?, ?],
+                        "Electric Tankless":    [?, ?, ?, ?],
+                        "Heat Pump":            [?, ?, ?, ?],
+                        "Natural Gas Tank":     [?, ?, ?, ?],
+                        "Natural Gas Tankless": [?, ?, ?, ?],
+                        "Active Solar":         [?, ?, ?, ?]
                     }
                 }
+
+                VALIDATION CHECKLIST:
+                - All values of categories are unique
+                - All values between 1.0-5.0 with decimals
+                - JSON syntax is valid
+                - Categories reflect user priorities
+                - Rankings logically follow performance data
             """
-        
-        # Get conversation history
-        chat_history = messages_to_langchain_format(state["messages"][:-1])
-        current_input = state["messages"][-1].content if state["messages"] else ""
         
         messages = [
             SystemMessage(content=system_prompt.strip()),
-            *chat_history,
-            HumanMessage(content=current_input.strip())
+            *conversation_context,
+            HumanMessage(content=user_message.strip())
         ]
         
         # Get response
-        full_response = await system_components.llm.ainvoke(messages)
-        response_content = full_response.content if hasattr(full_response, 'content') else str(full_response)
-        logger.info(f"LLM Response: {response_content}...")
+        response = await system_components.llm.ainvoke(messages)
+        response_content = response.content if hasattr(response, 'content') else str(response)
 
         try:
             start = response_content.find('{')
@@ -599,7 +604,8 @@ async def generate_recommendation(state: GraphState) -> GraphState:
             if start != -1 and end != -1 and end > start:
                 json_text = response_content[start:end+1]
                 chart_data = json.loads(json_text)
-                
+                json_text = JsonData(**chart_data)
+
         except (json.JSONDecodeError, ValueError) as e:
             logger.error(f"Failed to parse JSON response: {e}")
             logger.error(f"Original response: {response_content}")
@@ -629,11 +635,8 @@ async def generate_recommendation(state: GraphState) -> GraphState:
         
         result = {
             **state,
-            "full_response":  json.dumps(chart_data),
-            "is_complete": True,
-            "using_rag": False,
+            "chart_data": json_text.model_dump(),
             "recommendations_given": True,
-            "chart_data": chart_data
         }
         
         log_state(result, "generate_recommendation", "OUT")
@@ -706,30 +709,26 @@ async def generate_bar_explanation(state: GraphState) -> Dict[str, Any]:
             You are a technical energy advisor and analyst for residential water heater systems.
 
             A user clicked on a specific bar in a performance comparison chart and is asking for a deeper explanation. Use data, context, and comparative reasoning to explain why the selected water heater system scored **{clicked_data['score']}/5** for **"{clicked_data['metric']}"**.
-            Respond in a friendly, structured, and informative manner.
-            Your explanation should include:
+            Respond in a concise, friendly, and informative manner.
 
-            1. 📊 **Definition of the Metric**  
-            Clearly explain what the selected metric means and why it matters in evaluating a water heater. Use practical terms homeowners can relate to.
-            2. 🔍 **Reason Behind the Score**  
-            Explain why **{clicked_data['system']}** received a score of **{clicked_data['score']}/5** for this metric. Reference actual data from the summary table (e.g., operating cost, CO₂ emissions, reliability scores, etc.) to justify the value.
-            3. ⚖️ **Comparison Against Other Systems**  
-            Briefly compare how this system performs on this metric relative to the other 5 water heater types. Mention if it's significantly better, average, or below expectations.
-            4. 🏠 **Impact on User Decision**  
-            Help the user understand what this score implies for their personal situation or preferences. For example:
-            - A lower "Affordability Rank" may not be a dealbreaker if long-term savings are high.
-            - A top "Environmental Rank" might be important to an eco-conscious user.
+            Your explanation must include:
+
+            1. 🔍 **Reason Behind the Score**  
+            Explain in **1-2 sentences** why **{clicked_data['system']}** got **{clicked_data['score']}/5** for this metric, using actual values from the summary table.
+
+            2. ⚖️ **Comparison Against Others**  
+            Use **1-2 sentence** to compare this system briefly with the other 5 types. Mention only if it performs clearly better, worse, or average.
+
+            3. 🏠 **User Impact**  
+            In **3-4 sentence**, explain what this means for the user's decision, with a practical example if possible.
 
             ### Output Format:
-            Use headers, emojis, short paragraphs, and bullet points where helpful. Keep it easy to understand, yet insightful and data-backed.
-
-            Your tone should be:
-            - Friendly and clear (like a knowledgeable consultant)
-            - Objective and data-driven
-            - Encouraging, without overselling
-
-            Avoid repeating the exact same sentence structure. Vary your phrasing while covering the required four sections.
+            - Use headers, emojis, and short bullets where needed
+            - Each section should be max 1–2 sentences
+            - Avoid fluff and keep the tone clear and consultative
+            - Stick to useful data and comparisons only
         """
+
 
         # Get conversation history
         chat_history = messages_to_langchain_format(state["messages"][:-1])
@@ -1029,7 +1028,8 @@ class WaterHeaterGraphInterface:
                 app_state.conversation_sessions[session_id].update(final_state.values)
 
             if not fallback_sent:
-                yield f"data: {json.dumps({'content': 'I\'m sorry, I couldn\'t generate a meaningful response. Could you rephrase or ask something else?'})}\n\n"
+                # yield f"data: {json.dumps({'content': 'I\'m sorry, I couldn\'t generate a meaningful response. Could you rephrase or ask something else?'})}\n\n"
+                yield f"data: {json.dumps({'content': 'Recommedation Given'})}\n\n"
 
 
         except Exception as e:

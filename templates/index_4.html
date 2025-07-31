@@ -22,7 +22,7 @@
         }
 
         .container {
-            max-width: 1400px;
+            max-width: 1700px;
             margin: 0 auto;
             padding: 20px;
         }
@@ -390,7 +390,6 @@
                 <div class="chart-wrapper">
                     <canvas id="recommendationChart"></canvas>
                 </div>
-                <div class="legend" id="chartLegend"></div>
             </div>
         </div>
     </div>
@@ -564,8 +563,8 @@
                     borderColor: colors[index % colors.length],
                     borderWidth: 1,
                     borderRadius: 3,
-                    barThickness: 10,
-                    categoryPercentage: 0.6,     // more spacing between groups
+                    barThickness: 15,
+                    categoryPercentage: 0.5,
                     barPercentage: 0.8
                 }));
 
@@ -581,7 +580,33 @@
                         maintainAspectRatio: false,
                         plugins: {
                             legend: {
-                                display: true
+                                display: true,
+                                position: 'right',
+                                labels: {
+                                    usePointStyle: true,
+                                    boxWidth: 16,
+                                    boxHeight: 16,
+                                    padding: 15,
+                                    font: {
+                                        size: 14,
+                                        weight: 'bold'
+                                    },
+                                    // Render legend as checkboxes
+                                    generateLabels: function(chart) {
+                                        const datasets = chart.data.datasets;
+                                        return datasets.map((dataset, i) => ({
+                                            text: dataset.label,
+                                            fillStyle: dataset.backgroundColor,
+                                            hidden: !chart.isDatasetVisible(i),
+                                            datasetIndex: i,
+                                            // Custom: add checkbox HTML
+                                            fontColor: '#333',
+                                            pointStyle: 'rectRounded',
+                                            // Add checkbox markup
+                                            label: `<input type="checkbox" ${chart.isDatasetVisible(i) ? 'checked' : ''} style="margin-right:6px;" onclick="this.checked ? chart.show(i) : chart.hide(i);">${dataset.label}`
+                                        }));
+                                    }
+                                }
                             },
                             tooltip: {
                                 callbacks: {
@@ -638,7 +663,7 @@
                                 max: 5,
                                 title: {
                                     display: true,
-                                    text: 'Score (0 to 5)',
+                                    text: 'Score (1 to 5)',
                                     font: { weight: 'bold', size: 12 }
                                 },
                                 ticks: {
@@ -664,29 +689,10 @@
                     }
                 });
 
-                this.createLegend(data, colors);
+                // this.createLegend(data, colors);
             }
 
-            createLegend(data, colors) {
-                const legendContainer = document.getElementById('chartLegend');
-                legendContainer.innerHTML = '';
 
-                Object.keys(data.heaters).forEach((heater, index) => {
-                    const legendItem = document.createElement('div');
-                    legendItem.className = 'legend-item';
-
-                    const colorBox = document.createElement('div');
-                    colorBox.className = 'legend-color';
-                    colorBox.style.backgroundColor = colors[index % colors.length];
-
-                    const label = document.createElement('span');
-                    label.textContent = heater;
-
-                    legendItem.appendChild(colorBox);
-                    legendItem.appendChild(label);
-                    legendContainer.appendChild(legendItem);
-                });
-            }
 
             formatMessageContent(content) {
                 if (!content) return '';
