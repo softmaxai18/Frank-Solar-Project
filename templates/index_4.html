@@ -97,6 +97,7 @@
             padding: 12px 16px;
             border-radius: 18px;
             word-wrap: break-word;
+            text-align: left;
         }
 
         .message.user .message-content {
@@ -108,6 +109,62 @@
             background: #e9ecef;
             color: #333;
             border: 1px solid #dee2e6;
+        }
+
+        /* Enhanced message content formatting */
+        .message-content h2 {
+            color: #007bff;
+            font-size: 1.1em;
+            font-weight: bold;
+            margin: 10px 0 8px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .message-content h3 {
+            color: #333;
+            font-size: 1.05em;
+            font-weight: bold;
+            margin: 8px 0 6px 0;
+        }
+
+        .message-content .emoji {
+            font-size: 1.2em;
+            margin-right: 4px;
+        }
+
+        .message-content ul {
+            margin: 8px 0;
+            padding-left: 20px;
+        }
+
+        .message-content li {
+            margin: 4px 0;
+            line-height: 1.5;
+        }
+
+        .message-content p {
+            margin: 8px 0;
+            line-height: 1.5;
+        }
+
+        .message-content p:first-child {
+            margin-top: 0;
+        }
+
+        .message-content p:last-child {
+            margin-bottom: 0;
+        }
+
+        .message-content strong {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .message-content em {
+            font-style: italic;
+            color: #666;
         }
 
         .input-container {
@@ -143,7 +200,6 @@
             text-align: left;
             color: #6c757d;
         }
-
 
         .message-input:focus {
             border-color: #007bff;
@@ -307,7 +363,7 @@
             <div class="chat-container">
                 <div class="chat-header">
                     <div class="header">
-                        <h1>🏠 Water Heater Advisor</h1>
+                        <h1>🏠 Water Heater Type Advisor</h1>
                     </div>
                 </div>
 
@@ -317,7 +373,7 @@
                         </div>
                     </div>
                     <div class="loading" id="loading">
-                        <span class="status-indicator thinking"></span>AI is thinking...
+                        <span class="status-indicator thinking"></span>SEF is thinking...
                     </div>
                 </div>
 
@@ -325,13 +381,12 @@
                     <input type="text" id="messageInput" class="message-input" placeholder="Type your message here..."
                         disabled>
                     <button id="sendBtn" class="send-btn" disabled>Send</button>
-                    <!-- <button id="startBtn" class="start-btn">Start Conversation</button> -->
                 </div>
 
             </div>
 
             <div class="chart-container" id="chartContainer">
-                <h2 class="chart-title">🏆 Your Personalized Water Heater Recommendations</h2>
+                <h2 class="chart-title">🏆 Your Personalized Water Heater Type Recommendations</h2>
                 <div class="chart-wrapper">
                     <canvas id="recommendationChart"></canvas>
                 </div>
@@ -343,6 +398,7 @@
     <script>
         class WaterHeaterChat {
             constructor() {
+                window.chatAppInstance = this;
                 this.messageInput = document.getElementById('messageInput');
                 this.sendBtn = document.getElementById('sendBtn');
                 this.startBtn = document.getElementById('startBtn');
@@ -356,7 +412,6 @@
             }
 
             initializeEventListeners() {
-                // this.startBtn.addEventListener('click', () => this.startConversation());
                 this.sendBtn.addEventListener('click', () => this.sendMessage());
                 this.messageInput.addEventListener('keypress', (e) => {
                     if (e.key === 'Enter' && !this.sendBtn.disabled) {
@@ -374,14 +429,12 @@
                         this.chartContainer.classList.add('show');
                     }
                 } catch (error) {
-                    // Chart data not available, continue normally
                     console.log('No chart data available');
                 }
             }
 
             async startConversation() {
                 try {
-                    // this.startBtn.disabled = true;
                     this.showLoading();
 
                     const response = await fetch('/chat/start', {
@@ -397,13 +450,9 @@
                     this.enableInput();
                     this.isConversationStarted = true;
 
-                    // this.startBtn.textContent = 'Restart';
-                    // this.startBtn.disabled = false;
-
                 } catch (error) {
                     console.error('Error starting conversation:', error);
                     this.addMessage('Sorry, I encountered an error. Please try again.', 'assistant');
-                    // this.startBtn.disabled = false;
                 } finally {
                     this.hideLoading();
                 }
@@ -449,7 +498,7 @@
                                             messageElement = this.addMessage('', 'assistant');
                                         }
 
-                                        messageElement.querySelector('.message-content').textContent = assistantMessage;
+                                        this.updateMessageContent(messageElement, assistantMessage);
                                         this.scrollToBottom();
                                     }
                                 } catch (e) {
@@ -458,16 +507,11 @@
                             }
                         }
                     }
-                    // After the streaming loop ends, add this:
+
                     if (assistantMessage && this.isJsonResponse(assistantMessage)) {
                         await this.handleRecommendationResponse(assistantMessage);
                     } else {
-                        // Check if chart data exists in state and display it
                         await this.checkAndDisplayChartData();
-                    }
-                    // Check if this is a recommendation response (JSON data)
-                    if (this.isJsonResponse(assistantMessage)) {
-                        await this.handleRecommendationResponse(assistantMessage);
                     }
 
                 } catch (error) {
@@ -499,6 +543,7 @@
             }
 
             createChart(data) {
+                const chatApp = this;
                 const ctx = document.getElementById('recommendationChart').getContext('2d');
 
                 if (this.chart) {
@@ -508,12 +553,10 @@
                 const heaterNames = Object.keys(data.heaters);
                 const categories = data.categories;
 
-                // Colors for each heater type (matching your image style)
                 const colors = [
-                    '#FF9F43', '#5D4E75', '#A8D5A8', '#FF6B6B', '#4ECDC4', '#45B7D1'
+                    '#4F81BD', '#C0504D', '#9BBB59', '#8064A2', '#4BACC6', '#F79646'
                 ];
 
-                // Create datasets - one for each heater type
                 const datasets = heaterNames.map((heater, index) => ({
                     label: heater,
                     data: data.heaters[heater],
@@ -522,6 +565,8 @@
                     borderWidth: 1,
                     borderRadius: 3,
                     barThickness: 10,
+                    categoryPercentage: 0.6,     // more spacing between groups
+                    barPercentage: 0.8
                 }));
 
                 this.chart = new Chart(ctx, {
@@ -531,7 +576,7 @@
                         datasets: datasets
                     },
                     options: {
-                        indexAxis: 'y', // This makes it horizontal
+                        indexAxis: 'y',
                         responsive: true,
                         maintainAspectRatio: false,
                         plugins: {
@@ -560,9 +605,9 @@
                                 const datasetIndex = chartEl.datasetIndex;
                                 const dataIndex = chartEl.index;
 
-                                const systemName = chart.data.datasets[datasetIndex].label;
-                                const metric = chart.data.labels[dataIndex];
-                                const score = chart.data.datasets[datasetIndex].data[dataIndex];
+                                const systemName = this.data.datasets[datasetIndex].label;
+                                const metric = this.data.labels[dataIndex];
+                                const score = this.data.datasets[datasetIndex].data[dataIndex];
 
                                 const payload = {
                                     system: systemName,
@@ -577,7 +622,13 @@
                                     body: JSON.stringify(payload)
                                 })
                                     .then(res => res.json())
-                                    .then(data => console.log("Server response:", data))
+                                    .then(data => {
+                                        console.log("Server response:", data);
+
+                                        const explanationMessage = `Why did ${systemName} get ${score}/5 for ${metric}?`;
+                                        chatApp.messageInput.value = explanationMessage;
+                                        chatApp.sendMessage();
+                                    })
                                     .catch(err => console.error("Error sending to API:", err));
                             }
                         },
@@ -637,6 +688,59 @@
                 });
             }
 
+            formatMessageContent(content) {
+                if (!content) return '';
+
+                let formatted = content
+                    // Handle headers - fix regex to be more specific
+                    .replace(/^##\s+(.+)$/gm, '<h2><span class="emoji">🏆</span>$1</h2>')
+                    .replace(/^###\s+(.+)$/gm, '<h3>$1</h3>')
+
+                    // Bold and italic
+                    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+                    .replace(/\*([^*]+)\*/g, '<em>$1</em>')
+
+                    // Fix emoji handling - wrap standalone emojis
+                    .replace(/(🏆|🥇|📊|💡|🎯|⚡|💰|🌱|🔧|⭐)/g, '<span class="emoji">$1</span>');
+
+                // Handle bullet lists more carefully
+                const lines = formatted.split('\n');
+                const processedLines = [];
+                let inList = false;
+
+                for (let i = 0; i < lines.length; i++) {
+                    const line = lines[i].trim();
+
+                    if (line.startsWith('- ')) {
+                        if (!inList) {
+                            processedLines.push('<ul>');
+                            inList = true;
+                        }
+                        processedLines.push('<li>' + line.substring(2) + '</li>');
+                    } else {
+                        if (inList) {
+                            processedLines.push('</ul>');
+                            inList = false;
+                        }
+                        if (line) {
+                            processedLines.push('<p>' + line + '</p>');
+                        }
+                    }
+                }
+
+                if (inList) {
+                    processedLines.push('</ul>');
+                }
+
+                return processedLines.join('');
+            }
+
+            updateMessageContent(messageElement, content) {
+                const messageContent = messageElement.querySelector('.message-content');
+                const formattedContent = this.formatMessageContent(content);
+                messageContent.innerHTML = formattedContent;
+            }
+
             addMessage(content, type) {
                 const messageDiv = document.createElement('div');
                 messageDiv.className = `message ${type}`;
@@ -644,18 +748,23 @@
                 // Create speaker label
                 const label = document.createElement('div');
                 label.className = 'message-label';
-                label.textContent = type === 'user' ? 'You' : 'AI';
+                label.textContent = type === 'user' ? 'You' : 'SEF';
                 messageDiv.appendChild(label);
 
                 // Create message bubble
                 const messageContent = document.createElement('div');
                 messageContent.className = 'message-content';
-                messageContent.textContent = content;
+
+                // Format content based on type
+                if (type === 'assistant') {
+                    const formattedContent = this.formatMessageContent(content);
+                    messageContent.innerHTML = formattedContent;
+                } else {
+                    messageContent.textContent = content;
+                }
 
                 messageDiv.appendChild(messageContent);
-                
                 this.chatMessages.appendChild(messageDiv);
-
                 this.scrollToBottom();
                 return messageDiv;
             }

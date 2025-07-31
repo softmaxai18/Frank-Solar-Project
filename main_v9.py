@@ -78,6 +78,7 @@ class GraphState(TypedDict):
     error: Optional[str]
     decision: Optional[str]
     chart_data: Optional[Dict[str, Any]]
+    clicked_bar_data: Optional[Dict[str, Any]]
 
 #===========================================================================================================================================
 #                       DATA MODELS                          
@@ -87,7 +88,7 @@ class ChatMessage(BaseModel):
     message: str = Field(..., min_length=1, max_length=5000)
 
 class ClassificationResult(BaseModel):
-    type: str = Field(..., pattern="^(continue_conversation|need_rag_help)$")
+    type: str = Field(..., pattern="^(continue_conversation|need_rag_help|bar_explanation)$")
     confidence: float = Field(..., ge=0.0, le=1.0)
     reasoning: str
 
@@ -289,64 +290,73 @@ async def classify_user_input(state: GraphState) -> GraphState:
     log_state(state, "classify_user_input", "IN")
     
     try:
-        user_message = state["messages"][-1].content
+        # Define user_message at the beginning
+        user_message = state["messages"][-1].content if state["messages"] else ""
         conversation_context = state["messages"]
         
-        # Get last AI message for context
-        conversation_history = []
-        for msg in reversed(conversation_context[:-1]):
-            if isinstance(msg, (AIMessage, HumanMessage)):
-                role = "AI" if isinstance(msg, AIMessage) else "User"
-                conversation_history.append(f"{role}: {msg.content.strip()}")
-            if len(conversation_history) >= 2:
-                break
-        
-        classification_prompt = f"""
-        You are classifying the user's latest message to determine the next action.
-
-        Recent conversation history:
-        {conversation_history}
-
-        Latest User Message:
-        "{user_message}"
-
-        Decide between:
-        - "continue_conversation": if the user is continuing the current structured conversation or answering your previous question
-        - "need_rag_help": if the user is asking a NEW technical or fact-based question that might require accessing external documents (RAG)
-
-        Reply ONLY in this JSON format:
-        {{
-            "type": "continue_conversation" or "need_rag_help",
-            "confidence": float (range: 0.0 to 1.0),
-            "reasoning": "Brief justification of your classification"
-        }}
-        """.strip()
-        
-        response = await system_components.classifier_llm.ainvoke([HumanMessage(content=classification_prompt)])
-        
-        # Extract JSON from response
-        match = re.search(r'\{[\s\S]*?\}', response.content)
-        try:
-            result_dict = json.loads(match.group(0))
-            classification = ClassificationResult(**result_dict)
-        except (json.JSONDecodeError, ValueError):
+        # Check if there's clicked bar data and user is asking for explanation
+        clicked_data = state.get("clicked_bar_data")
+        if clicked_data and is_explanation_request(user_message):
             classification = ClassificationResult(
-                type="continue_conversation", confidence=0.5, reasoning="Failed to parse JSON"
+                type="bar_explanation", 
+                confidence=0.9, 
+                reasoning="User clicked bar and asking for explanation"
             )
+        else:
+            # Get last AI message for context
+            conversation_history = []
+            for msg in reversed(conversation_context[:-1]):
+                if isinstance(msg, (AIMessage, HumanMessage)):
+                    role = "AI" if isinstance(msg, AIMessage) else "User"
+                    conversation_history.append(f"{role}: {msg.content.strip()}")
+                if len(conversation_history) >= 2:
+                    break
+            
+            classification_prompt = f"""
+            You are classifying the user's latest message to determine the next action.
 
-        result= {
+            Recent conversation history:
+            {conversation_history}
+
+            Latest User Message:
+            "{user_message}"
+
+            Decide between:
+            - "continue_conversation": if the user is continuing the current structured conversation or answering your previous question
+            - "need_rag_help": if the user is asking a NEW technical or fact-based question that might require accessing external documents (RAG)
+
+            Reply ONLY in this JSON format:
+            {{
+                "type": "continue_conversation" or "need_rag_help",
+                "confidence": float (range: 0.0 to 1.0),
+                "reasoning": "Brief justification of your classification"
+            }}
+            """.strip()
+            
+            response = await system_components.classifier_llm.ainvoke([HumanMessage(content=classification_prompt)])
+            
+            # Extract JSON from response
+            match = re.search(r'\{[\s\S]*?\}', response.content)
+            try:
+                result_dict = json.loads(match.group(0))
+                classification = ClassificationResult(**result_dict)
+            except (json.JSONDecodeError, ValueError):
+                classification = ClassificationResult(
+                    type="continue_conversation", confidence=0.5, reasoning="Failed to parse JSON"
+                )
+
+        result = {
             **state,
             "classification": classification.model_dump()
         }
         log_state(result, "classify_user_input", "OUT")
-
         return result
 
     except Exception as e:
         logger.error(f"Error in classify_user_input: {e}")
-        error_state= {
+        error_state = {
             **state,
-            "classification": {"type": "answer", "confidence": 0.5, "reasoning": "Classification failed"},
+            "classification": {"type": "continue_conversation", "confidence": 0.5, "reasoning": "Classification failed"},
             "error": str(e)
         }
         log_state(error_state, "classify_user_input", "ERROR")
@@ -543,7 +553,7 @@ async def generate_recommendation(state: GraphState) -> GraphState:
                 - Base decision-making on fuel type suitability and system performance in context.
                 - Validate the JSON format before submission.
                 - Convert all numerical values to appropriate ranks based on the provided data.
-                - Use 0 to 5 ranking scale for all categories, where 0 is worst and 5 is best.
+                - Use 1 to 5 ranking scale for all categories, where 1 is worst and 5 is best.
 
                 The response MUST adhere to the following JSON format without any extra text:
 
@@ -682,6 +692,82 @@ async def continue_conversation(state: GraphState) -> Dict[str, Any]:
         log_state(error_state, "continue_conversation", "ERROR")
         return error_state
 
+async def generate_bar_explanation(state: GraphState) -> Dict[str, Any]:
+    """Node: Generate explanation for clicked bar"""
+    logger.info("Node: generate_bar_explanation")
+    log_state(state, "generate_bar_explanation", "IN")
+
+    try:
+        clicked_data = state.get("clicked_bar_data")
+        if not clicked_data:
+            return state
+            # Add recommendation trigger to conversation
+        system_prompt = f"""
+            You are a technical energy advisor and analyst for residential water heater systems.
+
+            A user clicked on a specific bar in a performance comparison chart and is asking for a deeper explanation. Use data, context, and comparative reasoning to explain why the selected water heater system scored **{clicked_data['score']}/5** for **"{clicked_data['metric']}"**.
+            Respond in a friendly, structured, and informative manner.
+            Your explanation should include:
+
+            1. 📊 **Definition of the Metric**  
+            Clearly explain what the selected metric means and why it matters in evaluating a water heater. Use practical terms homeowners can relate to.
+            2. 🔍 **Reason Behind the Score**  
+            Explain why **{clicked_data['system']}** received a score of **{clicked_data['score']}/5** for this metric. Reference actual data from the summary table (e.g., operating cost, CO₂ emissions, reliability scores, etc.) to justify the value.
+            3. ⚖️ **Comparison Against Other Systems**  
+            Briefly compare how this system performs on this metric relative to the other 5 water heater types. Mention if it's significantly better, average, or below expectations.
+            4. 🏠 **Impact on User Decision**  
+            Help the user understand what this score implies for their personal situation or preferences. For example:
+            - A lower "Affordability Rank" may not be a dealbreaker if long-term savings are high.
+            - A top "Environmental Rank" might be important to an eco-conscious user.
+
+            ### Output Format:
+            Use headers, emojis, short paragraphs, and bullet points where helpful. Keep it easy to understand, yet insightful and data-backed.
+
+            Your tone should be:
+            - Friendly and clear (like a knowledgeable consultant)
+            - Objective and data-driven
+            - Encouraging, without overselling
+
+            Avoid repeating the exact same sentence structure. Vary your phrasing while covering the required four sections.
+        """
+
+        # Get conversation history
+        chat_history = messages_to_langchain_format(state["messages"][:-1])
+        current_input = state["messages"][-1].content if state["messages"] else ""
+        
+        messages = [
+            SystemMessage(content=system_prompt.strip()),
+            *chat_history,
+            HumanMessage(content=current_input.strip())
+        ]
+
+        # Send messages to the LLM
+        full_response = await system_components.llm.ainvoke(messages)
+        full_response = full_response.content if hasattr(full_response, 'content') else str(full_response)
+        is_complete = is_conversation_complete(full_response)
+        
+        result = {
+            **state,
+            "full_response": full_response,
+            "is_complete": is_complete,
+            "using_rag": False
+        }
+        
+        log_state(result, "generate_bar_explanation", "OUT")
+        return result
+        
+    except Exception as e:
+        logger.error(f"Error in generate_bar_explanation: {e}")
+        error_state = {
+            **state,
+            "error": str(e),
+            "full_response": "I apologize, but I encountered an error processing your message.",
+            "is_complete": False
+        }
+        log_state(error_state, "generate_bar_explanation", "ERROR")
+        return error_state
+     
+
 def save_response(state: GraphState) -> GraphState:
     """Node: Save assistant response to conversation history"""
     logger.info("Node: save_response")
@@ -746,6 +832,14 @@ def has_sufficient_info(messages: List[BaseMessage]) -> bool:
     # Need at least 5 out of 7 categories covered
     return covered_categories >= 6
 
+def is_explanation_request(message: str) -> bool:
+    """Check if message is requesting explanation for bar click"""
+    explanation_keywords = [
+        'why', 'explain', 'how', 'reason', 'because', 
+        'score', 'rank', 'rating', 'got', '/5'
+    ]
+    return any(keyword in message.lower() for keyword in explanation_keywords)
+
 def is_conversation_complete(response: str) -> bool:
     """Check if the conversation has reached the recommendation stage"""
     completion_indicators = [
@@ -794,7 +888,8 @@ def log_state(state: GraphState, node_name: str, direction: str = "IN"):
         "error": state.get("error"),
         "message_count": len(state.get("messages", [])),
         "decision": state.get("decision", ""),
-        "chart_data": state.get("chart_data", {})
+        "chart_data": state.get("chart_data", {}),
+        "clicked_bar_data": state.get("clicked_bar_data", {})
     }
     
     for field, value in essential_fields.items():
@@ -831,6 +926,7 @@ def create_water_heater_graph():
     builder.add_node("check_recommend", check_trigger_conditions)
     builder.add_node("recommend", generate_recommendation)
     builder.add_node("continue", continue_conversation)
+    builder.add_node("bar_explain", generate_bar_explanation)
     builder.add_node("save_response", save_response)
     
     # Set entry point
@@ -842,7 +938,8 @@ def create_water_heater_graph():
         lambda state: state["classification"]["type"] if state.get("classification") else "continue_conversation",
         {
             "need_rag_help": "rag_query",
-            "continue_conversation": "add_to_conversation"
+            "continue_conversation": "add_to_conversation",
+            "bar_explanation": "bar_explain"
         }
     )
     
@@ -861,6 +958,7 @@ def create_water_heater_graph():
     
     builder.add_edge("recommend", "save_response")
     builder.add_edge("continue", "save_response")
+    builder.add_edge("bar_explain", "save_response")
     builder.add_edge("save_response", END)
     
     memory = MemorySaver()
@@ -922,7 +1020,7 @@ class WaterHeaterGraphInterface:
 
             async for msg, metadata in self.graph.astream(state, stream_mode="messages", config=self.config):
                 if isinstance(msg, AIMessage):
-                    if metadata.get("langgraph_node") in ["continue", "rag_query"]:
+                    if metadata.get("langgraph_node") in ["continue", "rag_query", "bar_explain"]:
                         yield f"data: {json.dumps({'content': msg.content})}\n\n"
                         fallback_sent = True
 
@@ -1060,7 +1158,15 @@ async def get_chart_data():
 @app.post("/chat/click-log")
 async def click_log(request: Request):
     data = await request.json()
+    
+    # Store the click data in session state
+    state = get_conversation_state(DEFAULT_SESSION_ID)
+    state["clicked_bar_data"] = data
+    app_state.conversation_sessions[DEFAULT_SESSION_ID] = state  # Make sure it's saved
+    
     print("Bar Clicked:", data)
+    print("Stored in state:", state.get("clicked_bar_data"))
+    
     return {"status": "success", "received": data}
 
 @app.get("/chat/status")
