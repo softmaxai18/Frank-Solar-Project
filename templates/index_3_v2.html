@@ -74,7 +74,25 @@
 
     <script>
         // Scores normalized to 0–5 (higher is better)
-        const data = "use json data "
+        const data = {
+                    "categories": [
+                        "Affordability Rank",
+                        "Annual Cost",
+                        "Abundance Rank",
+                        "Environmental Rank",
+                        "CO₂ Emissions",
+                        "Reliability Rank",
+                        "Complexity"
+                    ],
+                    "heaters": {
+                        "Electric Tank":        [0, 5, 0, 5, 0, 5, 0],
+                        "Electric Tankless":    [1, 3, 1, 3, 1, 3, 1],
+                        "Heat Pump":            [4, 1, 4, 1, 4, 1, 4],
+                        "Natural Gas Tank":     [3, 2, 3, 2, 3, 2, 3],
+                        "Natural Gas Tankless": [1, 2, 1, 2, 1, 2, 1],
+                        "Active Solar":         [5, 4, 5, 4, 5, 4, 5]
+                    }
+                }
 
         const ctx = document.getElementById('heaterChart').getContext('2d');
         const categories = data.categories;

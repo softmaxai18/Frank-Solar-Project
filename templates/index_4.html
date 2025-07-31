@@ -127,6 +127,24 @@
             transition: border-color 0.3s;
         }
 
+        .message-label {
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 4px;
+            color: #666;
+        }
+
+        .message.user .message-label {
+            text-align: right;
+            color: #007bff;
+        }
+
+        .message.assistant .message-label {
+            text-align: left;
+            color: #6c757d;
+        }
+
+
         .message-input:focus {
             border-color: #007bff;
         }
@@ -296,8 +314,6 @@
                 <div class="chat-messages" id="chatMessages">
                     <div class="message assistant">
                         <div class="message-content">
-                            Welcome! I'm here to help you find the perfect water heater for your home. Click "Start
-                            Conversation" to begin!
                         </div>
                     </div>
                     <div class="loading" id="loading">
@@ -309,7 +325,7 @@
                     <input type="text" id="messageInput" class="message-input" placeholder="Type your message here..."
                         disabled>
                     <button id="sendBtn" class="send-btn" disabled>Send</button>
-                    <button id="startBtn" class="start-btn">Start Conversation</button>
+                    <!-- <button id="startBtn" class="start-btn">Start Conversation</button> -->
                 </div>
 
             </div>
@@ -340,7 +356,7 @@
             }
 
             initializeEventListeners() {
-                this.startBtn.addEventListener('click', () => this.startConversation());
+                // this.startBtn.addEventListener('click', () => this.startConversation());
                 this.sendBtn.addEventListener('click', () => this.sendMessage());
                 this.messageInput.addEventListener('keypress', (e) => {
                     if (e.key === 'Enter' && !this.sendBtn.disabled) {
@@ -365,7 +381,7 @@
 
             async startConversation() {
                 try {
-                    this.startBtn.disabled = true;
+                    // this.startBtn.disabled = true;
                     this.showLoading();
 
                     const response = await fetch('/chat/start', {
@@ -381,13 +397,13 @@
                     this.enableInput();
                     this.isConversationStarted = true;
 
-                    this.startBtn.textContent = 'Restart';
-                    this.startBtn.disabled = false;
+                    // this.startBtn.textContent = 'Restart';
+                    // this.startBtn.disabled = false;
 
                 } catch (error) {
                     console.error('Error starting conversation:', error);
                     this.addMessage('Sorry, I encountered an error. Please try again.', 'assistant');
-                    this.startBtn.disabled = false;
+                    // this.startBtn.disabled = false;
                 } finally {
                     this.hideLoading();
                 }
@@ -505,7 +521,7 @@
                     borderColor: colors[index % colors.length],
                     borderWidth: 1,
                     borderRadius: 3,
-                    barThickness: 10
+                    barThickness: 10,
                 }));
 
                 this.chart = new Chart(ctx, {
@@ -519,61 +535,80 @@
                         responsive: true,
                         maintainAspectRatio: false,
                         plugins: {
-                            title: {
-                                display: true,
-                                text: 'Water Heater Performance Comparison',
-                                font: { size: 18, weight: 'bold' },
-                                padding: 20
-                            },
                             legend: {
-                                position: 'right',
-                                labels: {
-                                    padding: 20,
-                                    usePointStyle: true,
-                                    font: { size: 12 }
-                                }
+                                display: true
                             },
                             tooltip: {
                                 callbacks: {
-                                    title: function (context) {
-                                        return context[0].label;
-                                    },
                                     label: function (context) {
-                                        return `${context.dataset.label}: ${context.parsed.x}`;
+                                        return `${context.dataset.label}: ${context.parsed.x.toFixed(2)} / 5`;
                                     }
-                                }
+                                },
+                                backgroundColor: 'rgba(0,0,0,0.8)',
+                                titleFont: { size: 12 },
+                                bodyFont: { size: 11 },
+                                padding: 8
+                            },
+                            title: {
+                                display: true,
+                                text: 'Water Heater Performance Comparison',
+                            },
+                        },
+                        onClick: function (evt, activeEls) {
+                            if (activeEls.length > 0) {
+                                const chartEl = activeEls[0];
+                                const datasetIndex = chartEl.datasetIndex;
+                                const dataIndex = chartEl.index;
+
+                                const systemName = chart.data.datasets[datasetIndex].label;
+                                const metric = chart.data.labels[dataIndex];
+                                const score = chart.data.datasets[datasetIndex].data[dataIndex];
+
+                                const payload = {
+                                    system: systemName,
+                                    metric: metric,
+                                    score: score
+                                };
+
+                                console.log("Clicked:", payload);
+                                fetch("/chat/click-log", {
+                                    method: "POST",
+                                    headers: { "Content-Type": "application/json" },
+                                    body: JSON.stringify(payload)
+                                })
+                                    .then(res => res.json())
+                                    .then(data => console.log("Server response:", data))
+                                    .catch(err => console.error("Error sending to API:", err));
                             }
                         },
                         scales: {
                             x: {
-                                beginAtZero: true,
-                                max: 7,
-                                grid: {
-                                    color: 'rgba(0, 0, 0, 0.1)'
+                                min: 0,
+                                max: 5,
+                                title: {
+                                    display: true,
+                                    text: 'Score (0 to 5)',
+                                    font: { weight: 'bold', size: 12 }
                                 },
                                 ticks: {
-                                    stepSize: 1,
-                                    font: { size: 12 }
-                                }
+                                    stepSize: 1
+                                },
+                                grid: { color: 'rgba(0,0,0,0.05)' }
                             },
                             y: {
-                                grid: {
-                                    display: false
+                                title: {
+                                    display: true,
+                                    text: 'Performance Metric',
+                                    font: { weight: 'bold', size: 12 }
                                 },
                                 ticks: {
-                                    font: { size: 12, weight: 'bold' },
-                                    color: '#333'
-                                }
+                                    font: { size: 11 }
+                                },
+                                grid: { display: false }
                             }
                         },
-                        elements: {
-                            bar: {
-                                borderRadius: 3
-                            }
-                        },
-                        interaction: {
-                            intersect: false,
-                            mode: 'index'
+                        layout: {
+                            padding: { top: 15, right: 15 }
                         }
                     }
                 });
@@ -606,11 +641,19 @@
                 const messageDiv = document.createElement('div');
                 messageDiv.className = `message ${type}`;
 
+                // Create speaker label
+                const label = document.createElement('div');
+                label.className = 'message-label';
+                label.textContent = type === 'user' ? 'You' : 'AI';
+                messageDiv.appendChild(label);
+
+                // Create message bubble
                 const messageContent = document.createElement('div');
                 messageContent.className = 'message-content';
                 messageContent.textContent = content;
 
                 messageDiv.appendChild(messageContent);
+                
                 this.chatMessages.appendChild(messageDiv);
 
                 this.scrollToBottom();
@@ -647,7 +690,8 @@
 
         // Initialize the chat when the page loads
         document.addEventListener('DOMContentLoaded', () => {
-            new WaterHeaterChat();
+            const chatApp = new WaterHeaterChat();
+            chatApp.startConversation();
         });
     </script>
 </body>

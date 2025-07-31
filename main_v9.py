@@ -543,6 +543,7 @@ async def generate_recommendation(state: GraphState) -> GraphState:
                 - Base decision-making on fuel type suitability and system performance in context.
                 - Validate the JSON format before submission.
                 - Convert all numerical values to appropriate ranks based on the provided data.
+                - Use 0 to 5 ranking scale for all categories, where 0 is worst and 5 is best.
 
                 The response MUST adhere to the following JSON format without any extra text:
 
@@ -921,7 +922,7 @@ class WaterHeaterGraphInterface:
 
             async for msg, metadata in self.graph.astream(state, stream_mode="messages", config=self.config):
                 if isinstance(msg, AIMessage):
-                    if metadata.get("langgraph_node") in ["continue", "rag_query", "recommend"]:
+                    if metadata.get("langgraph_node") in ["continue", "rag_query"]:
                         yield f"data: {json.dumps({'content': msg.content})}\n\n"
                         fallback_sent = True
 
