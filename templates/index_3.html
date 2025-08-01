@@ -2,10 +2,12 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Water Heater Recommendation System</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <style>
+        /* [Keep your existing CSS here unchanged...] */
         * {
             margin: 0;
             padding: 0;
@@ -14,258 +16,66 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
             background: linear-gradient(135deg, #ffffff 0%, #ffffff 100%);
             min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+        }
+
+        .container {
+            max-width: 1755px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
         }
 
         .chat-container {
             background: white;
-            border-radius: 20px;
-            box-shadow: 0 0px 25px rgba(0, 0, 0, 0.4);
-            width: 1400px;
-            max-width: 2000px;
-            height: 96vh;
-            display: flex;
-            flex-direction: column;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 1.2);
             overflow: hidden;
+            margin-bottom: 20px;
         }
 
         .chat-header {
-            background: linear-gradient(135deg, #1e40af 0%, #000000 100%);
+            background: linear-gradient(45deg, #002fff, #000000);
             color: white;
             padding: 20px;
             text-align: center;
-            border-radius: 20px 20px 0 0;
-        }
-
-        .chat-header h1 {
-            font-size: 24px;
-            margin-bottom: 5px;
-        }
-
-        .chat-header p {
-            opacity: 0.9;
-            font-size: 14px;
         }
 
         .chat-messages {
-            flex: 1;
+            height: 575px;
             overflow-y: auto;
             padding: 20px;
             background: #f8f9fa;
         }
 
         .message {
-            margin-bottom: 20px;
-            display: flex;
-            align-items: flex-start;
-            animation: slideIn 0.3s ease-out;
+            margin-bottom: 15px;
+            animation: fadeIn 0.3s ease-in;
         }
 
-        .message.user {
-            justify-content: flex-end;
-        }
-
-        .message.assistant {
-            justify-content: flex-start;
-        }
-
-        .message-content {
-            max-width: 70%;
-            padding: 15px 20px;
-            border-radius: 20px;
-            word-wrap: break-word;
-            line-height: 1.5;
-        }
-
-        .message.user .message-content {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border-bottom-right-radius: 5px;
-        }
-
-        .message.assistant .message-content {
-            background: white;
-            color: #333;
-            border: 1px solid #e0e0e0;
-            border-bottom-left-radius: 5px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-
-        .message.assistant .message-content h2 {
-            color: #4facfe;
-            margin-bottom: 10px;
-            font-size: 18px;
-        }
-
-        .message.assistant .message-content h3 {
-            color: #667eea;
-            margin: 15px 0 8px 0;
-            font-size: 16px;
-        }
-
-        .message.assistant .message-content strong {
-            color: #333;
-        }
-
-        .message.assistant .message-content ul {
-            margin: 10px 0;
-            padding-left: 20px;
-        }
-
-        .message.assistant .message-content li {
-            margin: 5px 0;
-        }
-
-        .avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            margin: 0 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            color: white;
-            font-size: 16px;
-        }
-
-        .avatar.user {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
-
-        .avatar.assistant {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-        }
-
-        .chat-input {
-            background: white;
-            padding: 20px;
-            border-top: 1px solid #e0e0e0;
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-
-        .input-group {
-            flex: 1;
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-
-        #messageInput {
-            flex: 1;
-            padding: 15px 20px;
-            border: 2px solid #e0e0e0;
-            border-radius: 25px;
-            font-size: 16px;
-            outline: none;
-            transition: border-color 0.3s;
-        }
-
-        #messageInput:focus {
-            border-color: #4facfe;
-        }
-
-        .send-button {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            color: white;
-            border: none;
-            padding: 15px 25px;
-            border-radius: 25px;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: bold;
-            transition: transform 0.2s;
-        }
-
-        .send-button:hover {
-            transform: scale(1.05);
-        }
-
-        .send-button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .restart-button {
-            background: linear-gradient(135deg, #ff6b6b 0%, #ffa500 100%);
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: bold;
-            transition: transform 0.2s;
-        }
-
-        .restart-button:hover {
-            transform: scale(1.05);
-        }
-
-        .typing-indicator {
-            display: none;
-            align-items: center;
-            gap: 8px;
-            color: #6b7280;
-            font-size: 0.875rem;
-            margin: 8px 0;
-            padding: 0 20px;
-        }
-
-        .typing-dots {
-            display: flex;
-            gap: 4px;
-        }
-
-        .typing-dots span {
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background: #9ca3af;
-            animation: bounce 1.4s infinite both;
-        }
-
-        .typing-dots span:nth-child(1) {
-            animation-delay: -0.32s;
-        }
-
-        .typing-dots span:nth-child(2) {
-            animation-delay: -0.16s;
-        }
-
-        @keyframes bounce {
-
-            0%,
-            80%,
-            100% {
-                transform: scale(0);
-            }
-
-            40% {
-                transform: scale(1);
-            }
-        }
-
-        .status-bar {
-            background: #f0f0f0;
-            padding: 10px 20px;
-            font-size: 12px;
-            color: #666;
-            text-align: center;
-            border-top: 1px solid #e0e0e0;
-        }
-
-        @keyframes slideIn {
+        @keyframes fadeIn {
             from {
                 opacity: 0;
-                transform: translateY(20px);
+                transform: translateY(10px);
             }
 
             to {
@@ -274,489 +84,754 @@
             }
         }
 
-        @keyframes typing {
+        .message.user {
+            text-align: right;
+        }
 
-            0%,
-            60%,
-            100% {
+        .message.assistant {
+            text-align: left;
+        }
+
+        .message-content {
+            display: inline-block;
+            max-width: 70%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            word-wrap: break-word;
+            text-align: left;
+        }
+
+        .message.user .message-content {
+            background: #007bff;
+            color: white;
+        }
+
+        .message.assistant .message-content {
+            background: #e9ecef;
+            color: #333;
+            border: 1px solid #dee2e6;
+        }
+
+        /* Enhanced message content formatting */
+        .message-content h2 {
+            color: #007bff;
+            font-size: 1.1em;
+            font-weight: bold;
+            margin: 10px 0 8px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .message-content h3 {
+            color: #333;
+            font-size: 1.05em;
+            font-weight: bold;
+            margin: 8px 0 6px 0;
+        }
+
+        .message-content .emoji {
+            font-size: 1.2em;
+            margin-right: 4px;
+        }
+
+        .message-content ul {
+            margin: 8px 0;
+            padding-left: 20px;
+        }
+
+        .message-content li {
+            margin: 4px 0;
+            line-height: 1.5;
+        }
+
+        .message-content p {
+            margin: 8px 0;
+            line-height: 1.5;
+        }
+
+        .message-content p:first-child {
+            margin-top: 0;
+        }
+
+        .message-content p:last-child {
+            margin-bottom: 0;
+        }
+
+        .message-content strong {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .message-content em {
+            font-style: italic;
+            color: #666;
+        }
+
+        .input-container {
+            display: flex;
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #dee2e6;
+        }
+
+        .message-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 1px solid #ddd;
+            border-radius: 25px;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .message-label {
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 4px;
+            color: #666;
+        }
+
+        .message.user .message-label {
+            text-align: right;
+            color: #007bff;
+        }
+
+        .message.assistant .message-label {
+            text-align: left;
+            color: #6c757d;
+        }
+
+        .message-input:focus {
+            border-color: #007bff;
+        }
+
+        .send-btn,
+        .start-btn {
+            padding: 12px 24px;
+            margin-left: 10px;
+            background: linear-gradient(45deg, #007bff, #0056b3);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        .send-btn:hover,
+        .start-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 123, 255, 0.4);
+        }
+
+        .send-btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .chart-container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 1.2);
+            margin-top: 20px;
+            display: none;
+        }
+
+        .chart-container.show {
+            display: block;
+            animation: slideUp 0.5s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
                 transform: translateY(0);
+            }
+        }
+
+        .chart-title {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+            font-weight: 600;
+        }
+
+        .chart-wrapper {
+            position: relative;
+            height: 600px;
+            margin-bottom: 20px;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            color: #666;
+            font-style: italic;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .status-indicator.online {
+            background: #28a745;
+            animation: pulse 2s infinite;
+        }
+
+        .status-indicator.thinking {
+            background: #ffc107;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                opacity: 1;
+            }
+
+            50% {
                 opacity: 0.5;
             }
 
-            30% {
-                transform: translateY(-10px);
+            100% {
                 opacity: 1;
             }
         }
 
-        .error-message {
-            background: #ffebee;
-            color: #c62828;
-            padding: 10px 20px;
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
             border-radius: 10px;
-            margin: 10px 0;
-            border-left: 4px solid #c62828;
         }
 
-        .success-message {
-            background: #e8f5e8;
-            color: #2e7d32;
-            padding: 10px 20px;
-            border-radius: 10px;
-            margin: 10px 0;
-            border-left: 4px solid #2e7d32;
+        .legend-item {
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+        }
+
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 3px;
+            margin-right: 8px;
         }
 
         @media (max-width: 768px) {
-            .chat-container {
-                width: 95%;
-                height: 90vh;
+            .container {
+                padding: 10px;
+            }
+
+            .header h1 {
+                font-size: 2rem;
             }
 
             .message-content {
                 max-width: 85%;
             }
 
-            .chat-header h1 {
-                font-size: 20px;
+            .chart-wrapper {
+                height: 400px;
             }
+        }
 
-            .input-group {
-                flex-direction: column;
-                gap: 10px;
-            }
+        .tab-buttons {
+            display: flex;
+            justify-content: center;
+            background: #f1f1f1;
+            border-bottom: 1px solid #ccc;
+        }
 
-            #messageInput {
-                width: 100%;
-            }
+        .tab-button {
+            flex: 1;
+            padding: 12px;
+            cursor: pointer;
+            text-align: center;
+            background: #e9ecef;
+            font-weight: bold;
+            border: none;
+            transition: background 0.3s;
+        }
+
+        .tab-button.active {
+            background: #ffffff;
+            border-bottom: 3px solid #007bff;
+            color: #007bff;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
         }
     </style>
 </head>
 
 <body>
-    <div class="chat-container">
-        <div class="chat-header">
-            <h1>♨ Water Heater Type Recommendation System</h1>
-            <p>Find the perfect water heater for your home with AI-powered recommendations</p>
-        </div>
+    <div class="container">
+        <div class="content-wrapper">
+            <div class="chat-container">
+                <div class="chat-header">
+                    <div class="header">
+                        <h1>🏠 Water Heater Type Advisor</h1>
+                    </div>
+                </div>
 
-        <div class="chat-messages" id="chatMessages">
-            <!-- Messages will appear here -->
-        </div>
+                <!-- Tab Buttons -->
+                <div class="tab-buttons">
+                    <button id="chatTabBtn" class="tab-button active">Chat</button>
+                    <button id="chartTabBtn" class="tab-button" style="display: none;">Chart</button>
+                </div>
 
-        <div class="typing-indicator" id="typingIndicator">
-            <span>Consultant is responding</span>
-            <div class="typing-dots">
-                <span></span>
-                <span></span>
-                <span></span>
-            </div>
-        </div>
+                <!-- Tab Contents -->
+                <div id="chatTab" class="tab-content active">
+                    <div class="chat-messages" id="chatMessages">
+                        <div class="message assistant">
+                            <div class="message-content"></div>
+                        </div>
+                        <div class="loading" id="loading">
+                            <span class="status-indicator thinking"></span>SEF is thinking...
+                        </div>
+                    </div>
 
-        <div class="status-bar" id="statusBar">
-            Ready to help you find the perfect water heater
-        </div>
+                    <div class="input-container">
+                        <input type="text" id="messageInput" class="message-input"
+                            placeholder="Type your message here..." disabled />
+                        <button id="sendBtn" class="send-btn" disabled>Send</button>
+                    </div>
+                </div>
 
-        <div class="chat-input">
-            <div class="input-group">
-                <input type="text" id="messageInput" placeholder="Type your message here..." maxlength="5000">
-                <button class="send-button" id="sendButton" onclick="sendMessage()">Send</button>
-                <button class="restart-button" onclick="restartChat()">Restart</button>
+                <div id="chartTab" class="tab-content">
+                    <div class="chart-container show" id="chartContainer">
+                        <h2 class="chart-title">🏆 Your Personalized Water Heater Type Recommendations</h2>
+                        <div class="chart-wrapper">
+                            <canvas id="recommendationChart"></canvas>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
+    <!-- Your JS script remains the same except for tab integration -->
     <script>
-        let isWaitingForResponse = false;
-        let conversationStarted = false;
-        const tableCSS = `
-            <style>
-            .table-container {
-                margin: 20px 0;
-                overflow-x: auto;
-                border-radius: 8px;
-                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        class WaterHeaterChat {
+            constructor() {
+                window.chatAppInstance = this;
+                this.messageInput = document.getElementById("messageInput");
+                this.sendBtn = document.getElementById("sendBtn");
+                this.chatMessages = document.getElementById("chatMessages");
+                this.loading = document.getElementById("loading");
+                this.chartContainer = document.getElementById("chartContainer");
+                this.chart = null;
+                this.isConversationStarted = false;
+
+                // Tab buttons
+                this.chatTab = document.getElementById("chatTab");
+                this.chartTab = document.getElementById("chartTab");
+                this.chatTabBtn = document.getElementById("chatTabBtn");
+                this.chartTabBtn = document.getElementById("chartTabBtn");
+
+                this.initializeEventListeners();
             }
 
-            .comparison-table {
-                width: 100%;
-                border-collapse: collapse;
-                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-                background: white;
-                min-width: 800px;
-            }
-
-            .comparison-table th {
-                background: linear-gradient(135deg, #1e40af 0%, #1e0c83 100%);
-                color: white;
-                padding: 12px 8px;
-                text-align: left;
-                font-weight: 600;
-                font-size: 0.9em;
-                border-bottom: 2px solid #5a67d8;
-            }
-
-            .comparison-table td {
-                padding: 10px 8px;
-                border-bottom: 1px solid #e2e8f0;
-                vertical-align: middle;
-            }
-
-            .comparison-table tr:hover {
-                background-color: #f7fafc;
-            }
-
-            .system-name-cell {
-                font-weight: 600;
-                color: #2d3748;
-                background-color: #f8f9ff;
-            }
-
-            .cost-cell {
-                color: #c53030;
-                font-weight: 600;
-                text-align: right;
-            }
-
-            .emission-cell {
-                color: #38a169;
-                font-weight: 500;
-                text-align: right;
-            }
-
-            .number-cell {
-                text-align: center;
-                font-weight: 500;
-            }
-
-            .recommendation-header {
-                color: #2d3748;
-                border-bottom: 3px solid #667eea;
-                padding-bottom: 8px;
-                margin: 30px 0 20px 0;
-            }
-
-            .section-header {
-                color: #4a5568;
-                margin: 25px 0 15px 0;
-                border-left: 4px solid #667eea;
-                padding-left: 12px;
-            }
-
-            .emoji {
-                font-size: 1.2em;
-                margin-right: 8px;
-            }
-
-            /* Responsive design */
-            @media (max-width: 768px) {
-                .comparison-table {
-                    font-size: 0.8em;
-                    min-width: 600px;
-                }
-                
-                .comparison-table th,
-                .comparison-table td {
-                    padding: 8px 4px;
-                }
-            }
-            </style>
-            `;
-
-        // Initialize chat when page loads
-        document.addEventListener('DOMContentLoaded', function () {
-            startConversation();
-
-            // Add enter key support
-            document.getElementById('messageInput').addEventListener('keypress', function (e) {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    sendMessage();
-                }
-            });
-        });
-        document.addEventListener('DOMContentLoaded', injectTableCSS);
-
-        function injectTableCSS() {
-            if (!document.getElementById('table-styles')) {
-                const styleElement = document.createElement('div');
-                styleElement.id = 'table-styles';
-                styleElement.innerHTML = tableCSS;
-                document.head.appendChild(styleElement.firstElementChild);
-            }
-        }
-
-        async function startConversation() {
-            try {
-                document.getElementById('chatMessages').innerHTML = '';
-                const response = await fetch('/chat/start', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
+            initializeEventListeners() {
+                this.sendBtn.addEventListener("click", () => this.sendMessage());
+                this.messageInput.addEventListener("keypress", (e) => {
+                    if (e.key === "Enter" && !this.sendBtn.disabled) {
+                        this.sendMessage();
                     }
                 });
 
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-
-                const data = await response.json();
-                addMessage('assistant', data.message);
-                updateStatus('Conversation started - Ready for your questions');
-                conversationStarted = true;
-
-            } catch (error) {
-                console.error('Error starting conversation:', error);
-                addMessage('error', 'Failed to start conversation. Please refresh the page.');
-                updateStatus('Error: Failed to connect to server');
-            }
-        }
-
-        async function sendMessage() {
-            const messageInput = document.getElementById('messageInput');
-            const sendButton = document.getElementById('sendButton');
-            const message = messageInput.value.trim();
-
-            if (!message || isWaitingForResponse) {
-                return;
+                this.chatTabBtn.addEventListener("click", () => this.switchTab("chat"));
+                this.chartTabBtn.addEventListener("click", () => this.switchTab("chart"));
             }
 
-            // Add user message to chat
-            addMessage('user', message);
-            messageInput.value = '';
-
-            // Show typing indicator
-            showTypingIndicator();
-
-            // Disable input
-            isWaitingForResponse = true;
-            sendButton.disabled = true;
-            messageInput.disabled = true;
-            updateStatus('AI is processing your message...');
-
-            try {
-                const response = await fetch('/chat/message', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        message: message
-                    })
-                });
-
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+            switchTab(tab) {
+                if (tab === "chat") {
+                    this.chatTab.classList.add("active");
+                    this.chartTab.classList.remove("active");
+                    this.chatTabBtn.classList.add("active");
+                    this.chartTabBtn.classList.remove("active");
+                } else {
+                    this.chatTab.classList.remove("active");
+                    this.chartTab.classList.add("active");
+                    this.chatTabBtn.classList.remove("active");
+                    this.chartTabBtn.classList.add("active");
                 }
+            }
 
-                // Handle streaming response
-                const reader = response.body.getReader();
-                const decoder = new TextDecoder();
-                let assistantMessage = '';
-                let messageElement = null;
+            async checkAndDisplayChartData() {
+                try {
+                    const response = await fetch("/chat/chart-data");
+                    if (response.ok) {
+                        const chartData = await response.json();
+                        this.createChart(chartData);
+                        this.chartTabBtn.style.display = "inline-block";
+                        this.switchTab("chart");
+                    }
+                } catch (error) {
+                    console.log("No chart data available");
+                }
+            }
 
-                hideTypingIndicator();
+            async startConversation() {
+                try {
+                    this.showLoading();
+                    const response = await fetch("/chat/start", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                    });
 
-                while (true) {
-                    const { done, value } = await reader.read();
-                    if (done) break;
+                    const data = await response.json();
+                    this.clearMessages();
+                    this.addMessage(data.message, "assistant");
+                    this.enableInput();
+                    this.isConversationStarted = true;
+                } catch (error) {
+                    console.error("Error starting conversation:", error);
+                    this.addMessage("Sorry, I encountered an error. Please try again.", "assistant");
+                } finally {
+                    this.hideLoading();
+                }
+            }
 
-                    const chunk = decoder.decode(value);
-                    const lines = chunk.split('\n');
+            async sendMessage() {
+                const message = this.messageInput.value.trim();
+                if (!message) return;
 
-                    for (const line of lines) {
-                        if (line.startsWith('data: ')) {
-                            try {
-                                const data = JSON.parse(line.slice(6));
+                this.addMessage(message, "user");
+                this.messageInput.value = "";
+                this.disableInput();
+                this.showLoading();
 
-                                if (data.error) {
-                                    throw new Error(data.error);
-                                }
+                try {
+                    const response = await fetch("/chat/message", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ message }),
+                    });
 
-                                if (data.content) {
-                                    assistantMessage += data.content;
+                    if (!response.ok) throw new Error("Network response was not ok");
 
-                                    // Create or update message element
-                                    if (!messageElement) {
-                                        messageElement = addMessage('assistant', assistantMessage, true);
-                                    } else {
-                                        updateMessage(messageElement, assistantMessage);
+                    const reader = response.body.getReader();
+                    let assistantMessage = "";
+                    let messageElement = null;
+
+                    while (true) {
+                        const { done, value } = await reader.read();
+                        if (done) break;
+
+                        const chunk = new TextDecoder().decode(value);
+                        const lines = chunk.split("\n");
+
+                        for (const line of lines) {
+                            if (line.startsWith("data: ")) {
+                                try {
+                                    const data = JSON.parse(line.slice(6));
+                                    if (data.content) {
+                                        assistantMessage += data.content;
+                                        if (!messageElement) {
+                                            messageElement = this.addMessage("", "assistant");
+                                        }
+                                        this.updateMessageContent(messageElement, assistantMessage);
+                                        this.scrollToBottom();
                                     }
+                                } catch (e) {
+                                    console.error("Error parsing SSE data:", e);
                                 }
-
-                                if (data.done) {
-                                    updateStatus('Message complete - Ready for next question');
-                                    break;
-                                }
-
-                            } catch (e) {
-                                console.error('Error parsing SSE data:', e);
                             }
                         }
                     }
+
+                    if (assistantMessage && this.isJsonResponse(assistantMessage)) {
+                        await this.handleRecommendationResponse(assistantMessage);
+                    } else {
+                        await this.checkAndDisplayChartData();
+                    }
+                } catch (error) {
+                    console.error("Error sending message:", error);
+                    this.addMessage("Sorry, I encountered an error. Please try again.", "assistant");
+                } finally {
+                    this.enableInput();
+                    this.hideLoading();
+                }
+            }
+
+            isJsonResponse(response) {
+                try {
+                    const parsed = JSON.parse(response);
+                    return parsed.categories && parsed.heaters;
+                } catch {
+                    return false;
+                }
+            }
+
+            async handleRecommendationResponse(jsonResponse) {
+                try {
+                    const data = JSON.parse(jsonResponse);
+                    this.createChart(data);
+                    this.chartTabBtn.style.display = "inline-block";
+                    this.switchTab("chart");
+                } catch (error) {
+                    console.error("Error handling recommendation response:", error);
+                }
+            }
+
+            createChart(data) {
+                const chatApp = this;
+                const ctx = document.getElementById("recommendationChart").getContext("2d");
+
+                if (this.chart) {
+                    this.chart.destroy();
                 }
 
-            } catch (error) {
-                console.error('Error sending message:', error);
-                hideTypingIndicator();
-                addMessage('error', 'Failed to send message. Please try again.');
-                updateStatus('Error: Failed to send message');
-            } finally {
-                // Re-enable input
-                isWaitingForResponse = false;
-                sendButton.disabled = false;
-                messageInput.disabled = false;
-                messageInput.focus();
-            }
-        }
+                const heaterNames = Object.keys(data.heaters);
+                const categories = data.categories;
+                const colors = ["#4F81BD", "#C0504D", "#9BBB59", "#8064A2", "#4BACC6", "#F79646"];
 
-        function addMessage(type, content, isStreaming = false) {
-            const messagesContainer = document.getElementById('chatMessages');
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${type}`;
+                const datasets = heaterNames.map((heater, index) => ({
+                    label: heater,
+                    data: data.heaters[heater],
+                    backgroundColor: colors[index % colors.length],
+                    borderColor: colors[index % colors.length],
+                    borderWidth: 1,
+                    borderRadius: 3,
+                    barThickness: 15,
+                    categoryPercentage: 0.5,
+                    barPercentage: 0.8,
+                }));
 
-            let avatarText = '';
-            let avatarClass = '';
+                this.chart = new Chart(ctx, {
+                    type: "bar",
+                    data: {
+                        labels: categories,
+                        datasets: datasets,
+                    },
+                    options: {
+                        indexAxis: "y",
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'right',
+                                labels: {
+                                    usePointStyle: true,
+                                    boxWidth: 16,
+                                    boxHeight: 16,
+                                    padding: 15,
+                                    font: {
+                                        size: 14,
+                                        weight: 'bold'
+                                    },
+                                    // Render legend as checkboxes
+                                    generateLabels: function (chart) {
+                                        const datasets = chart.data.datasets;
+                                        return datasets.map((dataset, i) => ({
+                                            text: dataset.label,
+                                            fillStyle: dataset.backgroundColor,
+                                            hidden: !chart.isDatasetVisible(i),
+                                            datasetIndex: i,
+                                            // Custom: add checkbox HTML
+                                            fontColor: '#333',
+                                            pointStyle: 'rectRounded',
+                                            // Add checkbox markup
+                                            label: `<input type="checkbox" ${chart.isDatasetVisible(i) ? 'checked' : ''} style="margin-right:6px;" onclick="this.checked ? chart.show(i) : chart.hide(i);">${dataset.label}`
+                                        }));
+                                    }
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function (context) {
+                                        return `${context.dataset.label}: ${context.parsed.x.toFixed(2)} / 5`;
+                                    },
+                                },
+                                backgroundColor: 'rgba(0,0,0,0.8)',
+                                titleFont: { size: 12 },
+                                bodyFont: { size: 11 },
+                                padding: 8
+                            },
+                            title: {
+                                display: true,
+                                text: 'Water Heater Performance Comparison',
+                            },
+                        },
+                        onClick: function (evt, activeEls) {
+                            if (activeEls.length > 0) {
+                                const chartEl = activeEls[0];
+                                const datasetIndex = chartEl.datasetIndex;
+                                const dataIndex = chartEl.index;
 
-            if (type === 'user') {
-                avatarText = 'You';
-                avatarClass = 'user';
-            } else if (type === 'assistant') {
-                avatarText = 'AI';
-                avatarClass = 'assistant';
-            }
+                                const systemName = this.data.datasets[datasetIndex].label;
+                                const metric = this.data.labels[dataIndex];
+                                const score = this.data.datasets[datasetIndex].data[dataIndex];
 
-            if (type === 'error') {
-                messageDiv.innerHTML = `
-                    <div class="error-message">
-                        <strong>Error:</strong> ${content}
-                    </div>
-                `;
-            } else {
-                messageDiv.innerHTML = `
-                    ${type !== 'user' ? `<div class="avatar ${avatarClass}">${avatarText}</div>` : ''}
-                    <div class="message-content" ${isStreaming ? 'id="streaming-message"' : ''}>
-                        ${formatMessage(content)}
-                    </div>
-                    ${type === 'user' ? `<div class="avatar ${avatarClass}">${avatarText}</div>` : ''}
-                `;
-            }
+                                const payload = {
+                                    system: systemName,
+                                    metric: metric,
+                                    score: score,
+                                };
 
-            messagesContainer.appendChild(messageDiv);
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
-
-            return messageDiv;
-        }
-
-        function updateMessage(messageElement, content) {
-            const contentElement = messageElement.querySelector('.message-content');
-            if (contentElement) {
-                contentElement.innerHTML = formatMessage(content);
-                document.getElementById('chatMessages').scrollTop = document.getElementById('chatMessages').scrollHeight;
-            }
-        }
-
-        function formatMessage(content) {
-            // Convert markdown-like formatting to HTML
-            let formatted = content
-                // Headers
-                .replace(/^## (.*$)/gm, '<h2 class="recommendation-header">$1</h2>')
-                .replace(/^### (.*$)/gm, '<h3 class="section-header">$1</h3>')
-
-                // Bold and italic
-                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                .replace(/\*(.*?)\*/g, '<em>$1</em>')
-
-                // Emoji headers
-                .replace(/🏆|🥇|📊|💡|🎯/g, '<span class="emoji">$&</span>');
-
-            // Convert markdown-style tables to HTML tables
-            const tableRegex = /\|(.+)\|\s*\n\|(.+)\|\s*\n((?:\|.+\|\s*\n*)+)/g;
-            formatted = formatted.replace(tableRegex, function (match, header, separator, rows) {
-                let tableHTML = '<div class="table-container"><table class="comparison-table">';
-
-                // Process header
-                const headerCells = header.split('|').map(cell => cell.trim()).filter(cell => cell);
-                tableHTML += '<thead><tr>';
-                headerCells.forEach(cell => {
-                    tableHTML += `<th>${cell}</th>`;
+                                fetch("/chat/click-log", {
+                                    method: "POST",
+                                    headers: { "Content-Type": "application/json" },
+                                    body: JSON.stringify(payload),
+                                })
+                                    .then((res) => res.json())
+                                    .then((data) => {
+                                        const explanationMessage = `Why did ${systemName} get ${score}/5 for ${metric}?`;
+                                        chatApp.switchTab("chat");
+                                        chatApp.messageInput.value = explanationMessage;
+                                        chatApp.sendMessage();
+                                    })
+                                    .catch(err => console.error("Error sending to API:", err));
+                            }
+                        },
+                        scales: {
+                            x: {
+                                min: 0,
+                                max: 5,
+                                title: {
+                                    display: true,
+                                    text: 'Score (1 to 5)',
+                                    font: { weight: 'bold', size: 12 }
+                                },
+                                ticks: {
+                                    stepSize: 1
+                                },
+                                grid: { color: 'rgba(0,0,0,0.05)' }
+                            },
+                            y: {
+                                title: {
+                                    display: true,
+                                    text: 'Performance Metric',
+                                    font: { weight: 'bold', size: 12 }
+                                },
+                                ticks: {
+                                    font: { size: 11 }
+                                },
+                                grid: { display: false }
+                            }
+                        },
+                    },
                 });
-                tableHTML += '</tr></thead>';
+            }
 
-                // Process rows
-                tableHTML += '<tbody>';
-                const rowLines = rows.trim().split('\n');
-                rowLines.forEach(row => {
-                    if (row.trim() && row.includes('|')) {
-                        const cells = row.split('|').map(cell => cell.trim()).filter(cell => cell);
-                        tableHTML += '<tr>';
-                        cells.forEach((cell, index) => {
-                            let cellClass = '';
-                            if (cell.includes('$') || cell.includes('/yr')) cellClass = 'cost-cell';
-                            else if (cell.includes('mt/yr')) cellClass = 'emission-cell';
-                            else if (cell.match(/^\d+(\.\d+)?$/)) cellClass = 'number-cell';
-                            else if (index === 0) cellClass = 'system-name-cell';
+            formatMessageContent(content) {
+                if (!content) return "";
+                let formatted = content
+                    .replace(/^##\s+(.+)$/gm, '<h2><span class="emoji">🏆</span>$1</h2>')
+                    .replace(/^###\s+(.+)$/gm, "<h3>$1</h3>")
+                    .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
+                    .replace(/\*([^*]+)\*/g, "<em>$1</em>")
+                    .replace(/(🏆|🥇|📊|💡|🎯|⚡|💰|🌱|🔧|⭐)/g, '<span class="emoji">$1</span>');
 
-                            tableHTML += `<td class="${cellClass}">${cell}</td>`;
-                        });
-                        tableHTML += '</tr>';
+                const lines = formatted.split("\n");
+                const processedLines = [];
+                let inList = false;
+
+                for (let line of lines) {
+                    line = line.trim();
+                    if (line.startsWith("- ")) {
+                        if (!inList) {
+                            processedLines.push("<ul>");
+                            inList = true;
+                        }
+                        processedLines.push("<li>" + line.substring(2) + "</li>");
+                    } else {
+                        if (inList) {
+                            processedLines.push("</ul>");
+                            inList = false;
+                        }
+                        if (line) processedLines.push("<p>" + line + "</p>");
                     }
-                });
-                tableHTML += '</tbody></table></div>';
-
-                return tableHTML;
-            });
-
-            // Handle bullet lists: group consecutive - items into a single <ul>
-            formatted = formatted.replace(/((?:^|\n)- .+?)+(?=\n[^-]|\n*$)/gs, match => {
-                const items = match.trim().split('\n').map(line => {
-                    return '<li>' + line.replace(/^- /, '') + '</li>';
-                }).join('');
-                return '<ul>' + items + '</ul>';
-            });
-
-            // Paragraph formatting (light)
-            formatted = formatted.replace(/\n\n+/g, '</p><p>');
-            formatted = formatted.replace(/\n/g, '<br>');
-
-            // Wrap remaining standalone text in <p> (optional)
-            if (formatted && !formatted.startsWith('<') && !formatted.includes('<ul') && !formatted.includes('<table')) {
-                formatted = '<p>' + formatted + '</p>';
+                }
+                if (inList) processedLines.push("</ul>");
+                return processedLines.join("");
             }
 
-            return formatted;
-        }
+            updateMessageContent(messageElement, content) {
+                const messageContent = messageElement.querySelector(".message-content");
+                const formattedContent = this.formatMessageContent(content);
+                messageContent.innerHTML = formattedContent;
+            }
 
-        function showTypingIndicator() {
-            document.getElementById('typingIndicator').style.display = 'flex';
-            document.getElementById('chatMessages').scrollTop = document.getElementById('chatMessages').scrollHeight;
-        }
+            addMessage(content, type) {
+                const messageDiv = document.createElement("div");
+                messageDiv.className = `message ${type}`;
 
-        function hideTypingIndicator() {
-            document.getElementById('typingIndicator').style.display = 'none';
-        }
+                const label = document.createElement("div");
+                label.className = "message-label";
+                label.textContent = type === "user" ? "You" : "SEF";
+                messageDiv.appendChild(label);
 
-        function updateStatus(message) {
-            document.getElementById('statusBar').textContent = message;
-        }
+                const messageContent = document.createElement("div");
+                messageContent.className = "message-content";
+                messageContent.innerHTML = type === "assistant" ? this.formatMessageContent(content) : content;
 
-        async function restartChat() {
-            if (confirm('Are you sure you want to restart the conversation?')) {
-                // Clear messages
-                document.getElementById('chatMessages').innerHTML = '';
+                messageDiv.appendChild(messageContent);
+                this.chatMessages.appendChild(messageDiv);
+                this.scrollToBottom();
+                return messageDiv;
+            }
 
-                // Reset state
-                isWaitingForResponse = false;
-                conversationStarted = false;
-                document.getElementById('sendButton').disabled = false;
-                document.getElementById('messageInput').disabled = false;
-                document.getElementById('messageInput').value = '';
+            clearMessages() {
+                this.chatMessages.innerHTML = "";
+            }
 
-                // Start new conversation
-                updateStatus('Restarting conversation...');
-                await startConversation();
+            enableInput() {
+                this.messageInput.disabled = false;
+                this.sendBtn.disabled = false;
+                this.messageInput.focus();
+            }
+
+            disableInput() {
+                this.messageInput.disabled = true;
+                this.sendBtn.disabled = true;
+            }
+
+            showLoading() {
+                this.loading.classList.add("show");
+            }
+
+            hideLoading() {
+                this.loading.classList.remove("show");
+            }
+
+            scrollToBottom() {
+                this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
             }
         }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const chatApp = new WaterHeaterChat();
+            chatApp.startConversation();
+        });
     </script>
 </body>
 

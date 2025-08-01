@@ -199,77 +199,47 @@ class WaterHeaterSystemComponents:
     def _create_prompts(self):
         """Create the prompt templates"""
         system_prompt_text = f"""
-            As a friendly and knowledgeable water heater consultant, your goal is to systematically gather essential information to provide the best recommendation.
+            As a friendly and knowledgeable water heater type consultant, your goal is to focus on information gathering to understand user's need for recommendation.
 
             Your personality:
-            - Warm, approachable, and conversational - like talking to a trusted neighbor
+            - Warm, approachable, and conversational - like talking to a trusted neighbor or friend
             - Patient and understanding - you know this can be overwhelming for homeowners
-            - Genuinely enthusiastic about helping people find the right fit
+            - Genuinely enthusiastic about helping people save money and find the right fit
+            - Down-to-earth and practical - you explain things in everyday language
             - Thorough but not pushy - you gather information naturally through conversation
 
-            CRITICAL CONVERSATION RULES:
-            - Ask EXACTLY one question per response - never combine multiple topics or questions
-            - Wait for their complete answer before asking about anything else
-            - If you need clarification, focus only on the most important missing piece
-            - Never use connecting words like 'and', 'also', 'what about', 'speaking of which'
-            - Keep responses to maximum 2 sentences during information gathering
-            - Don't repeat the same question - adapt based on their responses
+            Your approach:
+            - Ask only one question like a caring consultant would - one at a time, naturally flowing from their responses
+            - Show genuine interest in their situation and acknowledge their concerns
+            - Use everyday language and avoid technical jargon unless necessary
+            - Be encouraging and reassuring throughout the process
+            - Share relevant insights and tips as the conversation flows naturally
 
-            SYSTEMATIC INFORMATION GATHERING:
-            You must collect information in this priority order (ask naturally, not like a checklist):
-
-            1. **SITUATION CONTEXT** - Why they need a water heater
-            - Replacement, new installation, upgrade
-            - Current system age, type and issues
-
-            2. **UTILITY AVAILABILITY** - What energy sources they have
-            - Gas line availability
-            - Electrical capacity
-            - Both available or limitations
-
-            3. **HOUSEHOLD DETAILS** - Who uses hot water
-            - Number of people in household
-
-            4. **USAGE PATTERNS** - How they use hot water
-            - Simultaneous usage (multiple showers, appliances)
-            - Peak usage times (morning rush, evening)
-            - Heavy usage activities (large baths, frequent laundry)
-
-            5. **SPACE & INSTALLATION** - Physical constraints
-            - Available space (indoor/outdoor, size limitations)
-            - Current location preferences
-            - Installation accessibility
-
-            6. **PRIORITIES & BUDGET** - What matters most
-            - Speed of heating, energy efficiency, reliability
-            - Budget considerations or cost sensitivity
-            - Environmental concerns
-
-            7. **PAST EXPERIENCE** - Previous knowledge (types only, not brands)
-            - Previous water heater types used
-            - Liked or disliked features
-            - Maintenance experiences
-
-            CONVERSATION APPROACH:
-            - Start with understanding their need
-            - Ask follow-up questions that show you're listening and care about details
+            Your conversation style:
+            - Start with understanding their needs
+            - Ask follow-up questions that show you're listening and care about the details
             - Acknowledge their responses and build on what they share
+            - Offer helpful context and insights along the way
             - Keep the tone friendly and conversational, not like a formal questionnaire
-            - Offer helpful context and insights as you learn about their situation
 
-            THINGS TO AVOID:
-            - Never ask about specific brands or manufacturers
-            - Don't ask about contractors or installation companies
-            - Avoid technical jargon unless necessary
-            - Don't ask compound questions or multiple topics at once
-            - Don't repeat questions they've already answered
+            Key areas to explore naturally through conversation:
+            1. Their current situation (replacement, new install, upgrade, etc.)
+            2. Available utilities (gas line, electrical capacity, space constraints)
+            3. Household size and hot water usage patterns
+            4. Space and installation constraints
+            5. Budget considerations and priorities (cost savings, efficiency, reliability)
+            6. Any past experiences
 
-            WHEN TO CONTINUE GATHERING INFO:
-            - You need clear answers to at least 5 of the 7 information categories above
-            - Keep asking until you understand their situation well enough for a solid recommendation
-            - If they give short answers, ask gentle follow-up questions to get more detail
+            Remember:
+            - Ask only one question at a time
+            - Never use "and", "also", "what about" in questions
+            - DON'T REPEAT the same question - adapt based on their responses
+            - You're having a conversation, not conducting an interview
+            - Let the discussion flow naturally based on their responses
+            - Maximum 2 sentences per response during information gathering
+            - Be genuinely helpful and supportive throughout
 
-            Remember: You're having a natural conversation to understand their specific needs.
+            Remember: Your goal is gathering the information needed to provide the best possible recommendation for their specific situation.
             """
         
         self.system_prompt = system_prompt_text
@@ -498,7 +468,7 @@ def check_trigger_conditions(state: GraphState) -> GraphState:
     # More specific force recommendation keywords
     last_message = state["messages"][-1].content.lower()
     force_keywords = [
-        'recommend now', 'give me recommendations', 'show me options', 'ready to compare', 
+        'now', 'give me recommendations', 'show me options', 'ready to compare', 
         'what do you recommend', 'help me decide now', 'ready for suggestions',
         'show recommendations', 'give recommendations', 'i want recommendations'
     ]
@@ -542,16 +512,16 @@ async def generate_recommendation(state: GraphState) -> GraphState:
                 RANKING METHODOLOGY:
                 Transform raw data into 1-5 scale rankings where 5 = best performance, 1 = worst performance.
 
-                1. COST EFFICIENCY RANK: Based on annual operating cost (lower cost = higher rank)
+                1. Affordability Ranking: Based on annual operating cost (lower cost = higher rank)
                 - Distribute rankings with clear separation: 1.2, 2.1, 3.4, 4.6, 5.0, 1.8
 
-                2. FUEL SECURITY RANK: Based on fuel supply longevity and availability
+                2. Abundance Ranking: Based on fuel supply longevity and availability
                 - Distribute rankings with variation: 1.5, 1.3, 4.8, 1.8, 3.7, 5.0  
 
-                3. ENVIRONMENTAL RANK: Based on CO2 emissions (lower emissions = higher rank)
+                3. Environmental Impact Ranking: Based on CO2 emissions (lower emissions = higher rank)
                 - Create distinct separation: 1.4, 1.2, 4.8, 1.6, 3.8, 5.0
 
-                4. RELIABILITY RANK: Based on system complexity and maintenance needs
+                4. Reliability Ranking: Based on system complexity and maintenance needs
                 - Inverse of complexity with adjustments: 2.8, 4.2, 4.6, 1.4, 3.5, 5.0
 
                 CRITICAL REQUIREMENTS:
@@ -565,10 +535,10 @@ async def generate_recommendation(state: GraphState) -> GraphState:
 
                 {
                     "categories": [
-                        "Affordability Ranking",
-                        "Abundance Ranking", 
-                        "Environmental Impact Ranking",
-                        "Reliability Ranking"
+                        "Affordability of the System",
+                        "Abundance of Energy Source", 
+                        "Environmental Impact",
+                        "Reliability of the Equipment"
                     ],
                     "heaters": {
                         "Electric Tank":        [?, ?, ?, ?],
@@ -710,6 +680,8 @@ async def generate_bar_explanation(state: GraphState) -> Dict[str, Any]:
 
             A user clicked on a specific bar in a performance comparison chart and is asking for a deeper explanation. Use data, context, and comparative reasoning to explain why the selected water heater system scored **{clicked_data['score']}/5** for **"{clicked_data['metric']}"**.
             Respond in a concise, friendly, and informative manner.
+            
+            Understand the user's requirement and situation for a explanation.
 
             Your explanation must include:
 
@@ -853,7 +825,7 @@ def is_conversation_complete(response: str) -> bool:
     return any(indicator in response.lower() for indicator in completion_indicators)
 
 def log_state(state: GraphState, node_name: str, direction: str = "IN"):
-    """Enhanced state logging"""
+    """Enhanced state logging with conversation saving"""
     
     color_map = {
         "IN": Fore.CYAN,
@@ -864,8 +836,9 @@ def log_state(state: GraphState, node_name: str, direction: str = "IN"):
     reset = Style.RESET_ALL
 
     timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
-
-    logger.info(f"{color}==== {timestamp} ==== {direction} {node_name.upper()} ===={reset}")
+    log_header = f"==== {timestamp} ==== {direction} {node_name.upper()} ===="
+    
+    logger.info(f"{color}{log_header}{reset}")
     
     # Clean and concise message display
     simplified_messages = [
@@ -880,9 +853,9 @@ def log_state(state: GraphState, node_name: str, direction: str = "IN"):
         "recommendations_given": state.get("recommendations_given", False),
         "using_rag": state.get("using_rag", False),
         "last_rag_query": state.get("last_rag_query", ""),
-        "last_ai_question":(state['last_ai_question'][:50] + "...") if state.get("full_response", "") else "None",
+        "last_ai_question": (state['last_ai_question'][:50] + "...") if state.get("last_ai_question") else "None",
         "classification": state.get("classification", {}),
-        "full_response": (state['full_response'][:50] + "...") if state.get("full_response", "") else "None",
+        "full_response": (state['full_response'][:50] + "...") if state.get("full_response") else "None",
         "is_complete": state.get("is_complete", False),
         "error": state.get("error"),
         "message_count": len(state.get("messages", [])),
@@ -891,10 +864,24 @@ def log_state(state: GraphState, node_name: str, direction: str = "IN"):
         "clicked_bar_data": state.get("clicked_bar_data", {})
     }
     
+    # Create a string representation of the state for file logging
+    state_log_content = f"{log_header}\n"
     for field, value in essential_fields.items():
-        print(f"{Fore.YELLOW}{field:>20}{reset}: {str(value).strip()}")
+        line = f"{field:>20}: {str(value).strip()}\n"
+        # print(f"{Fore.YELLOW}{field:>20}{reset}: {str(value).strip()}")
+        state_log_content += line
     
     logger.info(f"{color}==== {timestamp} ==== END {direction} ================{reset}\n")
+    state_log_content += f"==== {timestamp} ==== END {direction} ================\n\n"
+    
+    try:
+        filename = f"state_log.txt"
+        
+        with open(filename, "a", encoding="utf-8") as f:
+            f.write(state_log_content)
+        
+    except Exception as e:
+        logger.error(f"Error saving state log: {e}")
 
 def save_conversation_to_file(messages: List[BaseMessage], ai_response: str, filename: str = "conversation_log.txt"):
     """Save conversation to a file"""
@@ -1029,7 +1016,7 @@ class WaterHeaterGraphInterface:
 
             if not fallback_sent:
                 # yield f"data: {json.dumps({'content': 'I\'m sorry, I couldn\'t generate a meaningful response. Could you rephrase or ask something else?'})}\n\n"
-                yield f"data: {json.dumps({'content': 'Recommedation Given'})}\n\n"
+                yield f"data: {json.dumps({'content': 'Graph Prepared'})}\n\n"
 
 
         except Exception as e:
@@ -1112,7 +1099,7 @@ templates = Jinja2Templates(directory="templates")
 @app.get("/", response_class=HTMLResponse)
 async def read_root(request: Request):
     """Serve the main chat interface"""
-    return templates.TemplateResponse("index_4.html", {"request": request})
+    return templates.TemplateResponse("index_3_v2.html", {"request": request})
 
 @app.post("/chat/start")
 async def start_conversation(
